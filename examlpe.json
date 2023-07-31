@@ -1,0 +1,8 @@
+{
+    "token": "eyJh5vc.....................6owEA",
+    "cookie": "itchat.pkl",
+    "qr": "qr.png",
+    "database": "luna.sqlite",
+    "proxy": "http://127.0.0.1:8889",
+    "paid": "False"
+}
