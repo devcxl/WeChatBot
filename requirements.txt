@@ -1,0 +1,6 @@
+autopep8
+pypng
+PyQRCode
+requests
+revChatGPT
+# git+https://github.com/devcxl/wechat-api.git
