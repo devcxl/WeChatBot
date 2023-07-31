@@ -55,17 +55,11 @@ class GroupCommand(BaseCommand):
 
     def execute(self, user=None, params=None):
         import itchat
-        import json
-        # with open('test.json', 'w') as f:
-        #     f.write(json.dumps(, ensure_ascii=False))
-        # s = itchat.set_chatroom_name()
-        # with open('test.json', 'w') as f:
-        #     f.write(json.dumps(s, ensure_ascii=False))
-        # friends = itchat.get_friends(update=True)
-        # friend = itchat.search_friends(name='半颗白菜')[0]
-        # print(json.dumps(friends, ensure_ascii=False))
-        # itchat.send_msg(f"{params[0]}", friend.userName)
-        return "/group command executed."
+        resp = ''
+        chatrooms = itchat.get_chatrooms(True)
+        for c in chatrooms:
+            resp += f'{c.NickName}\n'
+        return resp
 
 
 class WeatherCommand(BaseCommand):
