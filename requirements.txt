@@ -3,4 +3,5 @@ pypng
 PyQRCode
 requests
 revChatGPT
+itchat-uos
 # git+https://github.com/devcxl/wechat-api.git
