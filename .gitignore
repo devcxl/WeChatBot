@@ -3,3 +3,5 @@
 *.pkl
 *.sqlite
 config.json
+dist/
+build/
