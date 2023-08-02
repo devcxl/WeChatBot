@@ -87,7 +87,7 @@ class WeChatGPT():
 
     def __init__(self):
         parser = argparse.ArgumentParser(description='WeChatGPT')
-        parser.add_argument('--config', required=True, type=str, help="配置文件路径")
+        parser.add_argument('--config','-f', required=True, type=str, help="配置文件路径")
         parser.add_argument('--verbose', action='store_true', help='是否启用详细模式')
         # 解析命令行参数
         self.args = parser.parse_args()
@@ -114,8 +114,13 @@ class WeChatGPT():
                           statusStorageDir=self.config.cookie)
         log.info("init successful!")
 
-    def handler_msg(self, msg, role=CHATBOT):
+    def handler_msg(self, msg, type="PRIVATE"):
         '''监听私聊消息'''
+        if type == "GROUP":
+            role = CHATBOT_GROUPS
+        else:
+            role = CHATBOT
+        
         chatname = msg.user.nickName
         if msg.user.remarkName != '':
             chatname = msg.user.remarkName
@@ -132,7 +137,11 @@ class WeChatGPT():
             # 新建会话
             chat = self.gptbot.new_chat(role)
         try:
-            resp = chat.replay(msg.text)
+            if type == "GROUP":
+                message = f'{chatname}:{msg.text}'
+            else:
+                message = msg.text
+            resp = chat.replay(message)
         except requests.exceptions.HTTPError:
             pass
 
@@ -191,12 +200,12 @@ class WeChatGPT():
             if commandresp is not None:
                 return commandresp
             else:
-                return self.handler_msg(msg=msg, role=CHATBOT)
+                return self.handler_msg(msg=msg)
 
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
             if msg.isAt:
-                return self.handler_msg(msg=msg, role=CHATBOT_GROUPS)
+                return self.handler_msg(msg=msg, type="GROUP")
         itchat.run()
 
 
