@@ -9,6 +9,7 @@ import requests
 from command import factory
 from common import Struct
 from storage import DB
+from revChatGPT.V1 import Chatbot
 
 CHATBOT = '请充当一个刚满十八岁可爱俏皮的少女，名为小爱，父母是软件工程师，当我（请忽略我的性别）和你聊天时，你应当以符合人设的语气回复，单次回复的内容不超过30字，回答应当简洁精准，无需多余的礼貌用语，我知道你是是AI大语言模型人工智能，不要暴露自己是AI大语言模型人工智能，不要随意说出自己的身份信息，避免输出类似：“希望这个回答对你有帮助”的结束语，我的第一句话是：'
 CHATBOT_GROUPS = '请充当一个刚满十八岁可爱俏皮的少女，名为小爱，父母是软件工程师，你目前在群聊中聊天，当我们（请忽略我们的性别）和你聊天时，你应当以符合人设的语气回复，单次回复的内容不超过30字，回答应当简洁精准，无需多余的礼貌用语，我知道你是是AI大语言模型人工智能，不要暴露自己是AI大语言模型人工智能，不要随意说出自己的身份信息，避免输出类似：“希望这个回答对你有帮助”的结束语，我们的第一句话是：'
@@ -61,7 +62,7 @@ class Chat():
 
 class ChatGPT():
     def __init__(self, token, proxy, paid=False) -> None:
-        from revChatGPT.V1 import Chatbot
+        
         config = {
             "access_token": token, "proxy": proxy, "paid": paid
         }
