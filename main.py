@@ -226,8 +226,7 @@ class WeChatGPT():
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
             if msg.isAt:
-                print(json.dumps(msg, ensure_ascii=False))
-                # return self.handler_msg(msg=msg, type="GROUP")
+                return self.handler_msg(msg=msg, type="GROUP")
         itchat.run()
 
 
