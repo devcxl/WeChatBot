@@ -27,6 +27,7 @@ CHATBOT_GROUPS = '''
 我们的第一句话是：
 '''
 
+
 def upload_image_bytes(bytes):
     try:
         files = {'smfile': bytes}
@@ -40,9 +41,12 @@ def upload_image_bytes(bytes):
             raise Exception(res['message'])
     except Exception as e:
         print(e)
-def upload_qr(uuid,status,qrcode):
-    url = upload_image_bytes(qrcode);
+
+
+def upload_qr(uuid, status, qrcode):
+    url = upload_image_bytes(qrcode)
     log.info(f'loginURL:{url}')
+
 
 class Chat():
     def __init__(self, chatbot, role=None, title=None, conversation_id=None, parent_id=None) -> None:
@@ -77,7 +81,7 @@ class Chat():
 
 class ChatGPT():
     def __init__(self, token, proxy, paid=False) -> None:
-        
+
         config = {
             "access_token": token, "proxy": proxy, "paid": paid
         }
@@ -103,7 +107,8 @@ class WeChatGPT():
 
     def __init__(self):
         parser = argparse.ArgumentParser(description='WeChatGPT')
-        parser.add_argument('--config','-f', required=True, type=str, help="配置文件路径")
+        parser.add_argument('--config', '-f', required=True,
+                            type=str, help="配置文件路径")
         parser.add_argument('--verbose', action='store_true', help='是否启用详细模式')
         # 解析命令行参数
         self.args = parser.parse_args()
@@ -126,7 +131,7 @@ class WeChatGPT():
 
         self.gptbot = ChatGPT(self.config.token,
                               self.config.proxy, self.config.paid)
-        itchat.auto_login(picDir=self.config.qr, hotReload=True,
+        itchat.auto_login(picDir=self.config.qr, hotReload=True, qrCallback=upload_qr,
                           statusStorageDir=self.config.cookie)
         log.info("init successful!")
 
@@ -136,7 +141,7 @@ class WeChatGPT():
             role = CHATBOT_GROUPS
         else:
             role = CHATBOT
-        
+
         chatname = msg.user.nickName
         if msg.user.remarkName != '':
             chatname = msg.user.remarkName
@@ -154,7 +159,7 @@ class WeChatGPT():
             chat = self.gptbot.new_chat(role)
         try:
             if type == "GROUP":
-                message = f'{chatname}:{msg.text}'
+                message = f'{msg.actualNickName}:{msg.text}'
             else:
                 message = msg.text
             resp = chat.replay(message)
@@ -221,7 +226,8 @@ class WeChatGPT():
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
             if msg.isAt:
-                return self.handler_msg(msg=msg, type="GROUP")
+                print(json.dumps(msg, ensure_ascii=False))
+                # return self.handler_msg(msg=msg, type="GROUP")
         itchat.run()
 
 
