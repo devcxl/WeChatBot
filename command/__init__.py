@@ -44,6 +44,7 @@ class NoticeCommand(BaseCommand):
         # itchat.send_msg(f"{params[0]}", friend.userName)
         return "/notify command executed."
 
+
 class GroupCommand(BaseCommand):
     '''群组'''
 
@@ -73,19 +74,10 @@ class WeatherCommand(BaseCommand):
         return '/weather'
 
     def execute(self, user=None, params=None):
-        import itchat
-        import json
-        print(params)
-        itchat.update_friend(userName=params.userName)
-
-        friends = itchat.search_friends(nickName=params.nickName)
-        print(friends)
-        itchat.delete_member_from_chatroom('白菜们', friends)
-        friend = friends[0]
-        # print(json.dumps(friends, ensure_ascii=False))
-        # itchat.send_msg(f"{params[0]}", friend.userName)
-
-        return self.currentWeather(f'{friend.province}{friend.city}')
+        if params[1] is None:
+            return self.currentWeather(f'{user.province}{user.city}')
+        else:
+            return self.currentWeather(f'{params[1]}')
 
     def geoCode(self, address):
         import requests
@@ -125,8 +117,6 @@ class WeatherCommand(BaseCommand):
         humidity = levies['humidity']
         weatherInfo = f'[{reporttime}]\n{province}{city}\n{weather}{temperature}摄氏度\n{winddirection}风{windpower}级\n空气湿度{humidity}'
         return weatherInfo
-
-
 
 
 factory = CommandFactory()
