@@ -74,7 +74,7 @@ class WeatherCommand(BaseCommand):
         return '/weather'
 
     def execute(self, user=None, params=None):
-        if params[1] is None:
+        if len(params) <= 1:
             return self.currentWeather(f'{user.province}{user.city}')
         else:
             return self.currentWeather(f'{params[1]}')
