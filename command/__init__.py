@@ -105,18 +105,21 @@ class WeatherCommand(BaseCommand):
             pass
 
     def currentWeather(self, address='北京市'):
-        adcode = self.geoCode(address)['geocodes'][0]['adcode']
-        levies = self.getWeather(adcode)['lives'][0]
-        reporttime = levies['reporttime']
-        province = levies['province']
-        city = levies['city']
-        weather = levies['weather']
-        temperature = levies['temperature']
-        winddirection = levies['winddirection']
-        windpower = levies['windpower']
-        humidity = levies['humidity']
-        weatherInfo = f'[{reporttime}]\n{province}{city}\n{weather}{temperature}摄氏度\n{winddirection}风{windpower}级\n空气湿度{humidity}'
-        return weatherInfo
+        try:
+            adcode = self.geoCode(address)['geocodes'][0]['adcode']
+            levies = self.getWeather(adcode)['lives'][0]
+            reporttime = levies['reporttime']
+            province = levies['province']
+            city = levies['city']
+            weather = levies['weather']
+            temperature = levies['temperature']
+            winddirection = levies['winddirection']
+            windpower = levies['windpower']
+            humidity = levies['humidity']
+            weatherInfo = f'[{reporttime}]\n{province}{city}\n{weather}{temperature}摄氏度\n{winddirection}风{windpower}级\n空气湿度{humidity}'
+            return weatherInfo
+        except KeyError:
+            return "不支持的地区"
 
 
 factory = CommandFactory()
