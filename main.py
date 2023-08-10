@@ -137,13 +137,16 @@ class WeChatGPT():
 
     def handler_msg(self, msg, isGroup=False):
         '''监听私聊消息'''
-        if isGroup:
-            role = CHATBOT_GROUPS
-        else:
-            role = CHATBOT
 
         if self.is_command(msg):
             return self.handler_command(msg, isGroup)
+
+        if isGroup:
+            role = CHATBOT_GROUPS
+            if not msg.isAt:
+                return
+        else:
+            role = CHATBOT
 
         chatname = msg.user.nickName
         if msg.user.remarkName != '':
@@ -239,8 +242,7 @@ class WeChatGPT():
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
             '''处理群聊消息'''
-            if msg.isAt:
-                return self.handler_msg(msg=msg, isGroup=True)
+            return self.handler_msg(msg=msg, isGroup=True)
 
         itchat.run()
 
