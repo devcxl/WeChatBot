@@ -293,3 +293,14 @@ if __name__ == "__main__":
         weChatGPT.run()
     except KeyboardInterrupt:
         log.info("bye!")
+
+# if __name__ == "__main__":
+#     user = {}
+#     executor = factory.getCommand('/emoji')
+#     print(executor.execute(user, ['/emoji']))
+
+#     print(executor.execute(user, ['/emoji','set_rate','30']))
+#     print(executor.execute(user, ['/emoji','set_rate','A']))
+
+#     print(executor.execute(user, ['/emoji','install','bilibili']))
+#     # print(executor.execute(user, ['/emoji','install','bilibili','-f']))
