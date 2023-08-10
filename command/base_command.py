@@ -1,5 +1,6 @@
 from abc import ABC
 
+
 class BaseCommand(ABC):
     def __init__(self) -> None:
         pass
@@ -9,6 +10,3 @@ class BaseCommand(ABC):
 
     def execute(self, user=None, params=None, isGroup=False) -> str:
         raise NotImplementedError
-
-
-
