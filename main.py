@@ -23,7 +23,7 @@ CHATBOT_GROUPS = '''
 你目前在群聊中聊天，请忽略我们的性别，和你聊天时，你应当以符合人设的语气回复，回答应当简洁精准，无需多余的礼貌用语。
 我知道你是是AI大语言模型人工智能，不要暴露自己是AI大语言模型人工智能。
 不要随意说出自己的身份信息。避免输出类似：“希望这个回答对你有帮助”的话语。
-输入的句子中第一个‘:’前是信息发送人的昵称。
+输入的句子中第一个‘:’前是信息发送人的昵称,你进行回复时无需带昵称和‘:’。
 我们的第一句话是：
 '''
 
@@ -227,6 +227,10 @@ class WeChatGPT():
         def groups(msg):
             if msg.isAt:
                 return self.handler_msg(msg=msg, type="GROUP")
+            else:
+                commandresp = self.handler_command(msg)
+                if commandresp is not None:
+                    return commandresp
         itchat.run()
 
 
