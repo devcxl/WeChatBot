@@ -146,10 +146,7 @@ class RandomPictrueCommand(BaseCommand):
             if emojiResp.status_code == 200:
                 with open(self.upload_dir + fileName,'wb') as f:
                     f.write(emojiResp.content)
-
-            itchat.send_image(self.upload_dir + fileName,toUserName=user.userName)
-
-        return 'successful!'
+        return f'@img@{self.upload_dir + fileName}'
 
 
 factory = CommandFactory()
