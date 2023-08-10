@@ -8,7 +8,7 @@ import sqlite3
 import requests
 from command import factory
 from common import Struct
-from storage import DB
+from storage import ChatGPTChat,  Message, Model, SQLiteDB, WeChatUser
 from revChatGPT.V1 import Chatbot
 
 CHATBOT = '''
@@ -109,7 +109,8 @@ class WeChatGPT():
         parser = argparse.ArgumentParser(description='WeChatGPT')
         parser.add_argument('--config', '-f', required=True,
                             type=str, help="配置文件路径")
-        parser.add_argument('--verbose', action='store_true', help='是否启用详细模式')
+        parser.add_argument('--verbose', '-v',
+                            action='store_true', help='是否启用详细模式')
         # 解析命令行参数
         self.args = parser.parse_args()
         if self.args.config:
@@ -122,11 +123,14 @@ class WeChatGPT():
         log.basicConfig(level=customLevel,
                         format='%(asctime)s [%(levelname)s] %(message)s')
 
-        self.db = DB(self.config.database)
+        self.db = SQLiteDB(self.config.database)
+        Model.initialize(self.db)
         try:
-            self.db.create_chat_table()
-            self.db.create_user_table()
-        except sqlite3.OperationalError:
+            ChatGPTChat.create_table()
+            WeChatUser.create_table()
+            Message.create_table()
+        except sqlite3.OperationalError as e:
+            print(e)
             pass
 
         self.gptbot = ChatGPT(self.config.token,
@@ -136,10 +140,26 @@ class WeChatGPT():
         log.info("init successful!")
 
     def handler_msg(self, msg, isGroup=False):
-        '''监听私聊消息'''
+        '''处理消息'''
+
+        # 已经处理过的消息不进行处理
+        flag = Message.fetch_one(f'msg_id=?', (msg.MsgId,))
+        if flag is not None:
+            return
 
         if self.is_command(msg):
             return self.handler_command(msg, isGroup)
+        message = Message()
+        message.context = msg.text
+        message.msg_id = msg.MsgId
+        
+        if isGroup:
+            message.toUserName = msg.user.nickName
+            message.fromUserName = msg.ActualNickName
+        else:
+            message.fromUserName = msg.user.NickName
+            message.toUserName = "ME"
+        message.save()
 
         if isGroup:
             role = CHATBOT_GROUPS
@@ -151,18 +171,22 @@ class WeChatGPT():
         chatname = msg.user.nickName
         if msg.user.remarkName != '':
             chatname = msg.user.remarkName
-        conversation_id = None
         # 查询会话是否存在
-        data = self.db.query_chat_data(chatname)
-        # 存在使用旧有会话
+        data = ChatGPTChat.fetch_one(f'name=?', (chatname,))
+
+        # 存在旧有会话
         if data is not None:
-            conversation_id, parent_id, title = data
-            log.info(f'{title}:{conversation_id},{parent_id}[{msg.text}]')
-            chat = self.gptbot.re_chat(conversation_id, parent_id, title)
+            log.info(
+                f'{data.title}:{data.conversation_id},{data.parent_id}[{msg.text}]')
+            chat = self.gptbot.re_chat(
+                data.conversation_id, data.parent_id, data.title)
         else:
+            # 不存在旧有会话
             title = f'和{chatname}的聊天'
             # 新建会话
             chat = self.gptbot.new_chat(role)
+
+        # 信息处理
         try:
             if isGroup:
                 message = f'{msg.actualNickName}:{msg.text}'
@@ -170,16 +194,24 @@ class WeChatGPT():
                 message = msg.text
             resp = chat.replay(message)
         except requests.exceptions.HTTPError:
-            pass
+            return '网络错误,请联系技术支持'
 
-        if conversation_id is not None:
-            log.info(f'{title}:{conversation_id},{chat.parent_id}[{resp}]')
+        # 存在旧有会话
+        if data is not None:
+            log.info(
+                f'{data.title}:{data.conversation_id},{chat.parent_id}[{resp}]')
             # 回复后更新最后的消息id
-            self.db.update_chat_parent_id(conversation_id, chat.parent_id)
+            data.parent_id = chat.parent_id
+            data.save_or_update()
         else:
-            # 会话信息存入数据库
-            self.db.insert_chat_data(
-                chatname, chat.get_conversation_id(), chat.get_parent_id(), title)
+            # 存在旧有会话 根据会话信息创建并存入数据库
+            chatGPTChat = ChatGPTChat()
+            chatGPTChat.conversation_id = chat.get_conversation_id()
+            chatGPTChat.parent_id = chat.get_parent_id()
+            chatGPTChat.parent_id = chat.get_parent_id()
+            chatGPTChat.title = title
+            chatGPTChat.name = chatname
+            chatGPTChat.save()
             # 当标题为空时设置标题
             chat.set_title(title)
         return resp
@@ -193,7 +225,7 @@ class WeChatGPT():
                 factory.getCommand(command_name)
                 return True
             except ValueError as e:
-                log.error('error_command:', str(e))
+                log.error(f'error_command:{str(e)}', )
                 return False
 
     def handler_command(self, msg, isGroup=False):
@@ -207,7 +239,7 @@ class WeChatGPT():
                 command_resp = executor.execute(msg.user, commands, isGroup)
                 return command_resp
             except Exception as e:
-                log.error('执行命令失败：', str(e))
+                log.error(f'执行命令失败：{str(e)}')
 
     def run(self):
         @itchat.msg_register(FRIENDS)
@@ -216,32 +248,40 @@ class WeChatGPT():
             # 解析XML文本
             root = ET.fromstring(msg.content)
             # 获取alias、bigheadimgurl和snsbgimgid的值
-            alias = root.get('alias')
-            bigheadimgurl = root.get('bigheadimgurl')
-            snsbgimgid = root.get('snsbgimgid')
+            wechat_id = root.get('alias')
+            head_img = root.get('bigheadimgurl')
+            bg_img = root.get('snsbgimgid')
             ticket = root.get('ticket')
-            fromnickname = root.get('fromnickname')
+            nick_name = root.get('fromnickname')
             content = root.get('content')
 
-            log.debug(alias, fromnickname, fromnickname,
-                      bigheadimgurl, snsbgimgid, content, ticket)
-            self.db.insert_user_data(alias, fromnickname, fromnickname,
-                                     bigheadimgurl, snsbgimgid, content, ticket)
-            try:
-                itchat.accept_friend(msg.user.userName, ticket)
-                itchat.send_msg(f'{fromnickname}({alias})请求添加好友：{content}。',)
-                log.info(f'{fromnickname}({alias})请求添加好友：{content}。添加成功!')
-            except Exception:
-                log.info(f'{fromnickname}({alias})请求添加好友：{content}。添加失败!')
+            weChatUser = WeChatUser()
+            weChatUser.wechat_id = wechat_id
+            weChatUser.user_name = msg.user.userName
+            weChatUser.nick_name = nick_name
+            weChatUser.head_img = head_img
+            weChatUser.bg_img = bg_img
+            weChatUser.content = content
+            weChatUser.ticket = ticket
+            weChatUser.raw = msg.content
+            weChatUser.save()
+            # itchat.accept_friend(msg.user.userName, ticket)
+            log.info(f'{nick_name}({wechat_id})请求添加好友：{content}')
 
         @itchat.msg_register(TEXT)
         def friend(msg):
             '''处理私聊消息'''
+            # import json
+            # with open('test.json','w') as f:
+            #     f.write(json.dumps(msg,ensure_ascii=False))
             return self.handler_msg(msg=msg)
 
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
             '''处理群聊消息'''
+            # import json
+            # with open('test.json', 'w') as f:
+            #     f.write(json.dumps(msg, ensure_ascii=False))
             return self.handler_msg(msg=msg, isGroup=True)
 
         itchat.run()

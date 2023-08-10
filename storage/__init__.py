@@ -1,105 +1,173 @@
 import sqlite3
+import logging as log
 
-class DB():
+class SQLiteDB:
+    def __init__(self, db_name):
+        self.conn = sqlite3.connect(db_name)
+        self.conn.row_factory = sqlite3.Row
+        self.cursor = self.conn.cursor()
 
-    def __init__(self, fileName) -> None:
-        self.connect = sqlite3.connect(fileName)
-
-    def execute(self, sql, params=None):
-        cursor = self.connect.cursor()
-        if params is None:
-            cursor.execute(sql)
+    def execute(self, query, params=None):
+        if params:
+            self.cursor.execute(query, params)
         else:
-            cursor.execute(sql, params)
-        cursor.close()
-        self.connect.commit()
+            self.cursor.execute(query)
+        self.conn.commit()
 
-    def query_one(self, sql) -> any:
-        cursor = self.connect.cursor()
-        cursor.execute(sql)
-        results = cursor.fetchone()
-        cursor.close()
-        return results
+    def fetch_all(self, query, params=None):
+        if params:
+            self.cursor.execute(query, params)
+        else:
+            self.cursor.execute(query)
+        return self.cursor.fetchall()
 
-    def close(self):
-        self.connect.close()
+    def fetch_one(self, query, params=None):
+        if params:
+            self.cursor.execute(query, params)
+        else:
+            self.cursor.execute(query)
+        return self.cursor.fetchone()
 
-    def create_config_table(self):
-        create_table = """
-        CREATE TABLE config (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT,
-            password TEXT,
-            access_token TEXT,
-            proxy TEXT,
-            create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-        self.execute(create_table)
+    def total(self, query, params=None):
+        if params:
+            result = self.fetch_one(query, params)
+        else:
+            result = self.fetch_one(query)
+        return result[0] if result else 0
 
-    def insert_config_data(self, email, password, access_token, proxy):
-        insert = f"""
-            INSERT INTO config (email, password, access_token, proxy)
-            VALUES ('{email}', '{password}', '{access_token}','{proxy}');
-        """
-        self.execute(insert)
+    def delete(self, query, params=None):
+        if params:
+            self.execute(query, params)
+        else:
+            self.execute(query)
 
-    def create_chat_table(self):
-        create_table = """
-        CREATE TABLE chat (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            conversation_id TEXT,
-            parent_id TEXT,
-            title TEXT,
-            create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-        self.execute(create_table)
 
-    def insert_chat_data(self, name, conversation_id, parent_id, title):
-        insert = f"""
-        INSERT INTO chat (name,conversation_id,parent_id,title) 
-        VALUES('{name}','{conversation_id}','{parent_id}','{title}');
-        """
-        self.execute(insert)
+class Model:
+    db = None
 
-    def query_chat_data(self, chatname):
-        query_sql = f"""SELECT conversation_id, parent_id, title FROM chat WHERE name='{chatname}';"""
-        return self.query_one(query_sql)
+    @classmethod
+    def initialize(cls, db):
+        cls.db = db
 
-    def update_chat_parent_id(self, conversation_id, parent_id):
-        update = f"""UPDATE chat SET parent_id = '{parent_id}' WHERE conversation_id = '{conversation_id}';"""
-        self.execute(update)
+    @classmethod
+    def create_table(cls):
+        columns = ', '.join([f"{column} {data_type}" for column,
+                            data_type in cls.__dict__.items() if not column.startswith('__')])
+        create_table_query = f"CREATE TABLE IF NOT EXISTS {cls.__name__} (id INTEGER PRIMARY KEY AUTOINCREMENT, {columns},create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
+        log.debug(f'{cls.__name__}: {create_table_query}')
+        cls.db.execute(create_table_query)
 
-    def create_user_table(self):
-        create_table = """
-        CREATE TABLE user (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            wechat_id TEXT,
-            nick_name TEXT,
-            marked_name TEXT,
-            head_img TEXT,
-            bg_img TEXT,
-            content TEXT,
-            ticket TEXT,
-            status INTEGER DEFAULT 0,
-            create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        """
-        self.execute(create_table)
+    def save(self):
+        columns = ', '.join(self.__dict__.keys())
+        placeholders = ', '.join(['?' for _ in self.__dict__.values()])
+        insert_query = f"INSERT INTO {self.__class__.__name__} ({columns}) VALUES ({placeholders})"
+        values = tuple(self.__dict__.values())
+        log.debug(f'{self.__class__.__name__}: {insert_query} {values}')
+        self.db.execute(insert_query, values)
 
-    def insert_user_data(self, wechat_id, nick_name, marked_name, head_img, bg_img, content, ticket):
-        insert = f"""
-        INSERT INTO user (wechat_id,nick_name,marked_name,head_img,bg_img,content,ticket)
-        VALUES('{wechat_id}','{nick_name}','{marked_name}','{head_img}','{bg_img}','{content}','{ticket}');
-        """
-        self.execute(insert)
+    def update(self):
+        update_query = f"UPDATE {self.__class__.__name__} SET " + ', '.join(
+            [f"{column} = ?" for column in self.__dict__.keys() if column != 'id']) + " WHERE id = ?"
+        values = tuple(value for column, value in self.__dict__.items()
+                       if column != 'id') + (self.id,)
+        log.debug(f'{self.__class__.__name__}: {update_query} {values}')
+        self.db.execute(update_query, values)
 
-    def update_user_status(self, wechat_id):
-        update = f"""UPDATE user SET status = 1 WHERE wechat_id = '{wechat_id}';"""
-        self.execute(update)
+    def save_or_update(self):
+        if hasattr(self, 'id') and self.id:
+            self.update()
+        else:
+            self.save()
 
+    def delete(self):
+        delete_query = f"DELETE FROM {self.__class__.__name__} WHERE id=?"
+        self.db.delete(delete_query, (self.id,))
+
+    @classmethod
+    def fetch_one(cls, where='1=1', params=None):
+        sql = f"""SELECT * FROM {cls.__name__} WHERE {where}"""
+        log.debug(f'{cls.__name__}: {sql} {params}')
+        if params:
+            result = cls.db.fetch_one(sql, params)
+        else:
+            result = cls.db.fetch_one(sql)
+
+        if result:
+            instance = cls()
+            instance.__dict__.update(result)
+            return instance
+        else:
+            return None
+
+    @classmethod
+    def total(cls, where='1=1', params=None):
+        sql = f"""SELECT count(1) FROM {cls.__name__} WHERE {where}"""
+        log.debug(f'{cls.__name__}: {sql} {params}')
+        return cls.db.total(sql)
+
+    @classmethod
+    def fetch_all(cls, where='1=1', params=None):
+        sql = f"""SELECT * FROM {cls.__name__} WHERE {where}"""
+        log.debug(f'{cls.__name__}: {sql} {params}')
+        if params:
+            results = cls.db.fetch_all(sql, params)
+        else:
+            results = cls.db.fetch_all(sql)
+
+        instances = []
+        for result in results:
+            instance = cls()
+            instance.__dict__.update(result)
+            instances.append(instance)
+
+        return instances
+
+
+class ChatGPTConfig(Model):
+    email = "TEXT"
+    password = "TEXT"
+    access_token = "TEXT"
+    proxy = "TEXT"
+
+
+class ChatGPTChat(Model):
+    name = "TEXT"
+    conversation_id = "TEXT"
+    parent_id = "TEXT"
+    title = "TEXT"
+    # SELECT conversation_id, parent_id, title FROM chat WHERE name='{chatname}';
+    # UPDATE chat SET parent_id = '{parent_id}' WHERE conversation_id = '{conversation_id}';
+
+
+class WeChatUser(Model):
+    wechat_id = "TEXT"
+    nick_name = "TEXT"
+    user_name = "TEXT"
+    marked_name = "TEXT"
+    head_img = "TEXT"
+    bg_img = "TEXT"
+    content = "TEXT"
+    ticket = "TEXT"
+    raw = "TEXT"
+    status = "INTEGER DEFAULT 0"
+    # UPDATE user SET status = 1 WHERE wechat_id = '{wechat_id}';
+
+class Message(Model):
+    msg_id = "INTEGER"  # MsgId
+    toUserName = "TEXT"  # NickName  # me
+    fromUserName = "TEXT"  # ActualNickName # msg.user.NickName
+    context = "TEXT"  # Text
+
+
+if __name__ == "__main__":
+
+    db = SQLiteDB('new.sqlite')
+    Model.initialize(db)
+    Message.create_table()
+    flag = Message.fetch_one("msg_id = '123456'")
+    # message = Message()
+    # message.context = 'msg.text'
+    # message.message_id = 'msg.MsgId'
+    # message.toUserName = 'msg.NickName or ''ME'''
+    # message.fromUserName = 'msg.ActualNickName or msg.user.NickName'
+    # message.save()
