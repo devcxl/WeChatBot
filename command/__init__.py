@@ -122,7 +122,7 @@ class EmojiCommand(BaseCommand):
 
     def __init__(self) -> None:
         self.rate = 70
-        self.base_path='/tmp/'
+        self.base_path='/save/'
         self.download_dir=f'{self.base_path}emoji/download/'
         self.upload_dir=f'{self.base_path}emoji/upload/'
         self.bilibili_emoji_path=f'{self.base_path}emoji/bilibili/'
@@ -155,9 +155,9 @@ class EmojiCommand(BaseCommand):
     
     def random_emoji(self):
         selector = random.randint(0,100)
-        if selector <= self.rate:
-            file_names = self.get_visible_files_in_directory(self.bilibili_emoji_path)
-            return f'@img@{self.bilibili_emoji_path + file_names[random.randint(0,len(file_names)-1)]}'
+        bilibili_emoji = self.get_visible_files_in_directory(self.bilibili_emoji_path)
+        if selector <= self.rate and len(bilibili_emoji)>0:
+            return f'@img@{self.bilibili_emoji_path + bilibili_emoji[random.randint(0,len(bilibili_emoji)-1)]}'
         else:
             resp = requests.get(self.api)
             if resp.status_code == 200:
