@@ -8,7 +8,7 @@ class BaseCommand(ABC):
     def getCommandName() -> str:
         raise NotImplementedError
 
-    def execute(self, user=None, params=None) -> str:
+    def execute(self, user=None, params=None, isGroup=False) -> str:
         raise NotImplementedError
 
 
@@ -37,7 +37,7 @@ class NoticeCommand(BaseCommand):
     def getCommandName(self):
         return '/notify'
 
-    def execute(self, user=None, params=None):
+    def execute(self, user=None, params=None, isGroup=False):
         import itchat
         import json
         friends = itchat.get_friends(update=True)
@@ -57,7 +57,7 @@ class GroupCommand(BaseCommand):
     def getCommandName(self):
         return '/group'
 
-    def execute(self, user=None, params=None):
+    def execute(self, user=None, params=None, isGroup=False):
         import itchat
         resp = ''
         chatrooms = itchat.get_chatrooms(True)
@@ -76,7 +76,7 @@ class WeatherCommand(BaseCommand):
     def getCommandName(self):
         return '/weather'
 
-    def execute(self, user=None, params=None):
+    def execute(self, user=None, params=None, isGroup=False):
         if len(params) <= 1:
             return self.currentWeather(f'{user.province}{user.city}')
         else:
@@ -134,7 +134,7 @@ class RandomPictrueCommand(BaseCommand):
     def getCommandName(self) -> str:
         return '/emoji'
 
-    def execute(self, user=None, params=None) -> str:
+    def execute(self, user=None, params=None, isGroup=False) -> str:
         import requests,json,itchat
         resp = requests.get(self.api)
         if resp.status_code == 200:
