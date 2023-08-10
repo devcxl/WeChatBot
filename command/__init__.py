@@ -149,6 +149,8 @@ class RandomPictrueCommand(BaseCommand):
 
             itchat.send_image(self.upload_dir + fileName,toUserName=user.userName)
 
+        return 'successful!'
+
 
 factory = CommandFactory()
 factory.registerCommand(NoticeCommand())
