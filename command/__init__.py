@@ -137,7 +137,7 @@ class EmojiCommand(BaseCommand):
     def execute(self, user=None, params=None, isGroup=False) -> str:
         if len(params)<=1:
             return self.random_emoji() 
-        elif len(params)==3:
+        elif len(params)>=3:
             if params[1] == 'set_rate' and params[2] is not None:
                 try:
                     self.rate=int(params[2])
@@ -147,6 +147,9 @@ class EmojiCommand(BaseCommand):
 
             if params[1] =='install' and params[2] =='bilibili':
                 file_names = self.get_visible_files_in_directory(self.bilibili_emoji_path)
+                if len(params)>=4 and params[3] =='-f':
+                    self.download_bilibili_emoji()
+                    return 'force install bilibili emoji successful!'
                 if len(file_names)>0:
                     return 'installed bilibili emoji'
                 else:
@@ -183,7 +186,7 @@ class EmojiCommand(BaseCommand):
             for emo in package['emote']:
                 emo['text'], emo['url']
                 jpg = requests.get(emo['url'], headers=headers)
-                with open(f'{self.bilibili_emoji_path}{emo["text"]}.png', 'wb') as file:
+                with open(f'{self.bilibili_emoji_path}{emo["text"]}.gif', 'wb') as file:
                     file.write(jpg.content)
 
     def get_visible_files_in_directory(self,directory) -> []:
@@ -206,6 +209,7 @@ if __name__ == "__main__":
     user = {}
     executor = factory.getCommand('/emoji')
     print(executor.execute(user, ['/emoji','install','bilibili']))
+    print(executor.execute(user, ['/emoji','install','bilibili','-f']))
     print(executor.execute(user, ['/emoji','set_rate','30']))
     print(executor.execute(user, ['/emoji','set_rate','A']))
     print(executor.execute(user, ['/emoji']))
