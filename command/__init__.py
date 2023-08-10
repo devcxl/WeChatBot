@@ -1,8 +1,11 @@
-class BaseCommand():
+from abc import ABC
+
+
+class BaseCommand(ABC):
     def __init__(self) -> None:
         pass
 
-    def getCommand() -> str:
+    def getCommandName() -> str:
         raise NotImplementedError
 
     def execute(self, user=None, params=None) -> str:
@@ -122,7 +125,40 @@ class WeatherCommand(BaseCommand):
             return "不支持的地区"
 
 
+class RandomPictrueCommand(BaseCommand):
+
+    def __init__(self) -> None:
+        self.upload_dir='/tmp/'
+        self.api = 'http://www.plapi.tech/api/emoji.php?type=json'
+
+    def getCommandName(self) -> str:
+        return '/emoji'
+
+    def execute(self, user=None, params=None) -> str:
+        import requests,json,itchat
+        resp = requests.get(self.api)
+        if resp.status_code == 200:
+            respBody = json.loads(resp.content);
+            emojiResp = requests.get(respBody['text'])
+            urlArray = respBody['text'].split('/')
+            fileName = urlArray[len(urlArray)-1]
+
+            if emojiResp.status_code == 200:
+                with open(self.upload_dir + fileName,'wb') as f:
+                    f.write(emojiResp.content)
+
+            itchat.send_image(self.upload_dir + fileName,toUserName=user.userName)
+
+
 factory = CommandFactory()
 factory.registerCommand(NoticeCommand())
 factory.registerCommand(WeatherCommand())
 factory.registerCommand(GroupCommand())
+factory.registerCommand(RandomPictrueCommand())
+
+
+# test code
+# if __name__ == "__main__":
+#     user = {}
+#     executor = factory.getCommand('/emoji')
+#     executor.execute(user, [])
