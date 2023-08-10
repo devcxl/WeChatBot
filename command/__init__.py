@@ -157,7 +157,7 @@ class EmojiCommand(BaseCommand):
         selector = random.randint(0,100)
         if selector <= self.rate:
             file_names = self.get_visible_files_in_directory(self.bilibili_emoji_path)
-            return f'@img@{self.bilibili_emoji_path + file_names[random.randint(0,len(file_names))]}'
+            return f'@img@{self.bilibili_emoji_path + file_names[random.randint(0,len(file_names)-1)]}'
         else:
             resp = requests.get(self.api)
             if resp.status_code == 200:
