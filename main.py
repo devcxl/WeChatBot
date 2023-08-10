@@ -135,12 +135,15 @@ class WeChatGPT():
                           statusStorageDir=self.config.cookie)
         log.info("init successful!")
 
-    def handler_msg(self, msg, type="PRIVATE"):
+    def handler_msg(self, msg, isGroup=False):
         '''监听私聊消息'''
-        if type == "GROUP":
+        if isGroup:
             role = CHATBOT_GROUPS
         else:
             role = CHATBOT
+
+        if self.is_command(msg):
+            return self.handler_command(msg, isGroup)
 
         chatname = msg.user.nickName
         if msg.user.remarkName != '':
@@ -158,7 +161,7 @@ class WeChatGPT():
             # 新建会话
             chat = self.gptbot.new_chat(role)
         try:
-            if type == "GROUP":
+            if isGroup:
                 message = f'{msg.actualNickName}:{msg.text}'
             else:
                 message = msg.text
@@ -178,17 +181,30 @@ class WeChatGPT():
             chat.set_title(title)
         return resp
 
-    def handler_command(self, msg):
+    def is_command(self, msg):
+        content = msg.text
+        if content.startswith('/'):
+            commands = content.split(' ')
+            command_name = commands[0]
+            try:
+                factory.getCommand(command_name)
+                return True
+            except ValueError as e:
+                log.error('error_command:', str(e))
+                return False
+
+    def handler_command(self, msg, isGroup=False):
         '''处理命令'''
         content = msg.text
         if content.startswith('/'):
             commands = content.split(' ')
-            commandName = commands[0]
+            command_name = commands[0]
             try:
-                executor = factory.getCommand(commandName)
-            except ValueError as e:
-                return str(e)
-            return executor.execute(msg.user, commands)
+                executor = factory.getCommand(command_name)
+                command_resp = executor.execute(msg.user, commands, isGroup)
+                return command_resp
+            except Exception as e:
+                log.error('执行命令失败：', str(e))
 
     def run(self):
         @itchat.msg_register(FRIENDS)
@@ -217,23 +233,21 @@ class WeChatGPT():
 
         @itchat.msg_register(TEXT)
         def friend(msg):
-            commandresp = self.handler_command(msg)
-            if commandresp is not None:
-                return commandresp
-            else:
-                return self.handler_msg(msg=msg)
+            '''处理私聊消息'''
+            return self.handler_msg(msg=msg)
 
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
+            '''处理群聊消息'''
             if msg.isAt:
-                return self.handler_msg(msg=msg, type="GROUP")
-            else:
-                commandresp = self.handler_command(msg)
-                if commandresp is not None:
-                    return commandresp
+                return self.handler_msg(msg=msg, isGroup=True)
+
         itchat.run()
 
 
 if __name__ == "__main__":
-    weChatGPT = WeChatGPT()
-    weChatGPT.run()
+    try:
+        weChatGPT = WeChatGPT()
+        weChatGPT.run()
+    except KeyboardInterrupt:
+        log.info("bye!")
