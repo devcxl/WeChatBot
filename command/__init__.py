@@ -137,7 +137,7 @@ class EmojiCommand(BaseCommand):
     def execute(self, user=None, params=None, isGroup=False) -> str:
         if len(params)<=1:
             return self.random_emoji() 
-        else:
+        elif len(params)==3:
             if params[1] == 'set_rate' and params[2] is not None:
                 try:
                     self.rate=int(params[2])
