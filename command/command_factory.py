@@ -1,5 +1,6 @@
 from .base_command import BaseCommand
 
+
 class CommandFactory():
     '''命令工厂'''
 

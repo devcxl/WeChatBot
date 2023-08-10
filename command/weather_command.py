@@ -1,6 +1,8 @@
-import requests,json
+import requests
+import json
 
 from .base_command import BaseCommand
+
 
 class WeatherCommand(BaseCommand):
     '''天气'''
@@ -55,4 +57,3 @@ class WeatherCommand(BaseCommand):
             return weatherInfo
         except KeyError:
             return "不支持的地区"
-

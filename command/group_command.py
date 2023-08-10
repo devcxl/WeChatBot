@@ -1,4 +1,3 @@
-
 import itchat
 from .base_command import BaseCommand
 

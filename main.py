@@ -152,7 +152,7 @@ class WeChatGPT():
         message = Message()
         message.context = msg.text
         message.msg_id = msg.MsgId
-        
+
         if isGroup:
             message.toUserName = msg.user.nickName
             message.fromUserName = msg.ActualNickName
