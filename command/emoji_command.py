@@ -15,6 +15,7 @@ class EmojiCommand(BaseCommand):
         os.makedirs(self.download_dir,exist_ok=True)
         os.makedirs(self.upload_dir,exist_ok=True)
         os.makedirs(self.bilibili_emoji_path,exist_ok=True)
+        os.makedirs(self.telegram_emoji_path,exist_ok=True)
 
     def getCommandName(self) -> str:
         return '/emoji'
