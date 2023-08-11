@@ -10,6 +10,7 @@ class EmojiCommand(BaseCommand):
         self.download_dir=f'{self.base_path}emoji/download/'
         self.upload_dir=f'{self.base_path}emoji/upload/'
         self.bilibili_emoji_path=f'{self.base_path}emoji/bilibili/'
+        self.telegram_emoji_path=f'{self.base_path}emoji/telegram/'
         self.api = 'http://www.plapi.tech/api/emoji.php?type=json'
         os.makedirs(self.download_dir,exist_ok=True)
         os.makedirs(self.upload_dir,exist_ok=True)
@@ -43,8 +44,15 @@ class EmojiCommand(BaseCommand):
     def random_emoji(self):
         selector = random.randint(0,100)
         bilibili_emoji = self.get_visible_files_in_directory(self.bilibili_emoji_path)
-        if selector <= self.rate and len(bilibili_emoji)>0:
-            return f'@img@{self.bilibili_emoji_path + bilibili_emoji[random.randint(0,len(bilibili_emoji)-1)]}'
+        telegram_emoji = self.get_visible_files_in_directory(self.telegram_emoji_path)
+        total= len(bilibili_emoji) + len(telegram_emoji)
+        if selector <= self.rate and total>0:
+            select_emoji = random.randint(0,1)
+            if select_emoji == 1:
+                image = self.bilibili_emoji_path + bilibili_emoji[random.randint(0,len(bilibili_emoji)-1)]
+            else: 
+                image = self.telegram_emoji_path + telegram_emoji[random.randint(0,len(telegram_emoji)-1)]
+            return f'@img@{image}'
         else:
             resp = requests.get(self.api)
             if resp.status_code == 200:
