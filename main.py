@@ -147,8 +147,6 @@ class WeChatGPT():
         if flag is not None:
             return
 
-        if self.is_command(msg):
-            return self.handler_command(msg, isGroup)
         message = Message()
         message.context = msg.text
         message.msg_id = msg.MsgId
@@ -160,6 +158,9 @@ class WeChatGPT():
             message.fromUserName = msg.user.NickName
             message.toUserName = "ME"
         message.save()
+        
+        if self.is_command(msg):
+            return self.handler_command(msg, isGroup)
 
         if isGroup:
             role = CHATBOT_GROUPS
