@@ -26,7 +26,7 @@ class TTSCommand(BaseCommand):
         return '/tts'
 
     def execute(self, user=None, params=None, isGroup=False):
-        return f'@fil@{self.azure_tts(params[1])}'
+        return f'@fil@{self.azure_tts(params[1:])}'
 
     def azure_tts(self, word):
         data = f'''
