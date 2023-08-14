@@ -37,7 +37,7 @@ class TTSCommand(BaseCommand):
         </speak>
         '''
         response = requests.post(self.url, headers=self.headers, data=data.encode('utf-8'))
-        file = f"{self.VOICE_FILE_PATH}outp.mp3"
+        file = f"{self.VOICE_FILE_PATH}output.mp3"
         if response.status_code == 200:
             with open(file, "wb") as f:
                 f.write(response.content)
