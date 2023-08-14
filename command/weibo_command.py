@@ -1,9 +1,9 @@
 import requests  # 向页面发送请求
 from bs4 import BeautifulSoup as BS  # 解析页面
-# from .base_command import BaseCommand
+from .base_command import BaseCommand
 
 
-class WeiboCommand():
+class WeiboCommand(BaseCommand):
     '''群组'''
 
     def __init__(self) -> None:
@@ -19,9 +19,7 @@ class WeiboCommand():
         }
         self.session = requests.Session()
         self.jar = requests.cookies.RequestsCookieJar()
-        # pl_top_realtimehot
-
-        # super().__init__()
+        super().__init__()
 
     def getCommandName(self):
         return '/weibo'
@@ -29,29 +27,25 @@ class WeiboCommand():
     def execute(self, user=None, params=None, isGroup=False):
         resp = ''
         r = self.session.get(self.url, headers=self.header)  # 发送请求
-        print(r.status_code)
         soup = BS(r.text, 'html.parser')
         div = soup.find('div', id='pl_top_realtimehot')
         table = div.find('table')
         tbody = table.find('tbody')
 
         trs = tbody.find_all('tr')
-        for tr in trs:
+        for tr in trs[1:]:
             tds = tr.find_all('td')
-            for td in tds:
-                print(td.text)
-        return
-
-        a_tags = table.find_all('a')
-        for a in a_tags:
-            print(a.text)
-
+            number = tds[0].text
+            if number =='•':
+                continue
+            a =  tds[1].find('a')
+            resp += tds[0].text + a.text + '\n'
         return resp
 
 
 if __name__ == "__main__":
     weibo =  WeiboCommand()
-    weibo.execute()
+    print(weibo.execute())
 
 
 
