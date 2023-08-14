@@ -159,6 +159,11 @@ class Message(Model):
     context = "TEXT"  # Text
 
 
+class WeiBoHotHistory(Model):
+    title = "TEXT"  # 热搜标题
+    url = "TEXT"  # url
+
+
 if __name__ == "__main__":
 
     db = SQLiteDB('new.sqlite')
