@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as BS  # 解析页面
 from .base_command import BaseCommand
 
 class WeiboCommand(BaseCommand):
-    '''群组'''
+    '''微博热搜'''
 
     def __init__(self) -> None:
 
