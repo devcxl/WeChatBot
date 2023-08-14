@@ -5,4 +5,5 @@ requests
 revChatGPT
 itchat-uos
 pyinstaller
+beautifulsoup4
 # git+https://github.com/devcxl/wechat-api.git
