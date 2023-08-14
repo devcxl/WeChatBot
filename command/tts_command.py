@@ -26,7 +26,7 @@ class TTSCommand(BaseCommand):
         return '/tts'
 
     def execute(self, user=None, params=None, isGroup=False):
-        return f'@vid@{self.azure_tts(params[1])}'
+        return f'@fil@{self.azure_tts(params[1])}'
 
     def azure_tts(self, word):
         data = f'''
@@ -48,4 +48,4 @@ class TTSCommand(BaseCommand):
 
 if __name__ == "__main__":
     tts = TTSCommand()
-    print(tts.execute(params=['/tts', '你可以使用 Python 的 requests 库来实现等效于上述 curl 命令的 POST 请求。下面是使用 requests 库的示例代码：']))
+    print(tts.execute(params=['/tts', '你可以使用 Python 的 requests 库']))
