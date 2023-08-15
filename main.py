@@ -1,13 +1,13 @@
 import itchat
 from itchat.content import *
 import xml.etree.ElementTree as ET
-import logging as log
+import logging
 import argparse
 import json
 import sqlite3
 import requests
 from command import factory
-from common import Struct
+from common import Struct, Logger
 from storage import ChatGPTChat,  Message, Model, SQLiteDB, WeChatUser
 from revChatGPT.V1 import Chatbot
 
@@ -26,6 +26,8 @@ CHATBOT_GROUPS = '''
 输入的句子中第一个‘:’前是信息发送人的昵称,你进行回复时无需带昵称和‘:’。
 我们的第一句话是：
 '''
+
+log = Logger('wechatbot')
 
 
 def upload_image_bytes(bytes):
@@ -68,7 +70,7 @@ class Chat():
             self.chatbot.change_title(self.conversation_id, title)
 
     def replay(self, content=None) -> str:
-        if self.conversation_id == None and self.parent_id == None:
+        if self.conversation_id is None and self.parent_id is None:
             content = self.role + content
         else:
             content = content
@@ -117,11 +119,10 @@ class WeChatGPT():
             with open(self.args.config) as file:
                 self.config_dict = json.load(file)
                 self.config = Struct(self.config_dict)
-                customLevel = log.INFO
+                custom_level = logging.INFO
         if self.args.verbose:
-            customLevel = log.DEBUG
-        log.basicConfig(level=customLevel,
-                        format='%(asctime)s [%(levelname)s] %(message)s')
+            custom_level = logging.DEBUG
+        log = Logger(level=custom_level)
 
         self.db = SQLiteDB(self.config.database)
         Model.initialize(self.db)
@@ -297,11 +298,15 @@ if __name__ == "__main__":
 
 # if __name__ == "__main__":
 #     user = {}
-#     executor = factory.getCommand('/emoji')
-#     print(executor.execute(user, ['/emoji']))
-
-#     print(executor.execute(user, ['/emoji','set_rate','30']))
-#     print(executor.execute(user, ['/emoji','set_rate','A']))
-
-#     print(executor.execute(user, ['/emoji','install','bilibili']))
+#     # executor = factory.getCommand('/emoji')
+#     # print(executor.execute(user, ['/emoji']))
+#
+#     # print(executor.execute(user, ['/emoji','set_rate','30']))
+#     # print(executor.execute(user, ['/emoji','set_rate','A']))
+#
+#     # print(executor.execute(user, ['/emoji','install','bilibili']))
+#     weChatGPT = WeChatGPT()
 #     # print(executor.execute(user, ['/emoji','install','bilibili','-f']))
+#     log.info('res')
+#     tts = factory.getCommand('/vits')
+#     res = tts.execute(params=['/vits', '你可以使用 Python 的 requests 库'])
