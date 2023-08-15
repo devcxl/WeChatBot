@@ -49,3 +49,24 @@ class TTSCommand(BaseCommand):
 if __name__ == "__main__":
     tts = TTSCommand()
     print(tts.execute(params=['/tts', '你可以使用 Python 的 requests 库']))
+    # curl -X 'GET' \
+    #   'http://127.0.0.1/api/paimon?content=%E4%BD%A0%E5%A5%BD%EF%BC%8C%E6%88%91%E6%98%AF%E6%B4%BE%E8%92%99%E3%80%82&speed=1' \
+    #   -H 'accept: application/json' \
+    #   -H 'access-token: f4eaace55d3240e2b81e235c300f4a9d'
+    import requests
+
+    data = {
+        'content':'数字生命计划越来越接近于落地。哈哈哈',
+        'speed':'1.1'
+    }
+    headers = {
+        'access-token':'aeb56737b0984338ad5535de8bc3b8e8'
+    }
+    resp = requests.get('https://live.ci-s.top/api/paimon',data,headers=headers)
+    if resp.status_code ==200:
+        with open('pai.wav','wb') as f:
+            f.write(resp.content)
+
+    resp = requests.get('https://live.ci-s.top/api/paimon/total',headers=headers)
+    if resp.status_code ==200:
+        print(resp.text)
