@@ -1,5 +1,5 @@
 .env/
-*/__pycache__
+**/__pycache__
 *.pkl
 *.sqlite
 config.json
