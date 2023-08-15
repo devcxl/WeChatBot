@@ -6,9 +6,4 @@ revChatGPT
 itchat-uos
 pyinstaller
 beautifulsoup4
-Unidecode
-pypinyin
-phonemizer
-numpy
-soundfile
 # git+https://github.com/devcxl/wechat-api.git
