@@ -122,7 +122,7 @@ class WeChatGPT():
                 custom_level = logging.INFO
         if self.args.verbose:
             custom_level = logging.DEBUG
-        log = Logger(level=custom_level)
+        log = Logger(name=self.__class__.__name__,level=custom_level)
 
         self.db = SQLiteDB(self.config.database)
         Model.initialize(self.db)
