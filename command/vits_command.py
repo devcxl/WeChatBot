@@ -19,7 +19,7 @@ class VITSCommand(BaseCommand):
         self.MODEL_FILE_NAME = 'G_1434000.pth'
         os.makedirs(self.VOICE_FILE_PATH, exist_ok=True)
         os.makedirs(self.MODELS_FILE_PATH, exist_ok=True)
-        self.hps = paimon.utils.get_hparams_from_file("paimon/config.json")
+        self.hps = paimon.utils.get_hparams_from_file("paimon/biaobei_base.json")
         self.net_g = SynthesizerTrn(
             len(symbols),
             self.hps.data.filter_length // 2 + 1,
