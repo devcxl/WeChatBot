@@ -2,7 +2,6 @@ import os
 import sys
 import logging
 import json
-from scipy.io.wavfile import read
 import torch
 
 MATPLOTLIB_FLAG = False
