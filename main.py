@@ -300,13 +300,10 @@ if __name__ == "__main__":
 #     user = {}
 #     # executor = factory.getCommand('/emoji')
 #     # print(executor.execute(user, ['/emoji']))
-#
 #     # print(executor.execute(user, ['/emoji','set_rate','30']))
 #     # print(executor.execute(user, ['/emoji','set_rate','A']))
-#
 #     # print(executor.execute(user, ['/emoji','install','bilibili']))
-#     weChatGPT = WeChatGPT()
 #     # print(executor.execute(user, ['/emoji','install','bilibili','-f']))
-#     log.info('res')
+#     t = """我要给派蒙完整的一生。"""
 #     tts = factory.getCommand('/vits')
-#     res = tts.execute(params=['/vits', '你可以使用 Python 的 requests 库'])
+#     res = tts.execute(params=['/vits', t])
