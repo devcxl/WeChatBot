@@ -51,13 +51,4 @@ class WeiboCommand(BaseCommand):
             a =  tds[1].find('a')
             resp += f'{tds[0].text} {a.text}\n'
         return resp
-
-
-if __name__ == "__main__":
-    weibo =  WeiboCommand()
-    print(weibo.execute())
-    
-
-
-
 	
