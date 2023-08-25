@@ -11,9 +11,14 @@ class TTSCommand(BaseCommand):
         self.speech_key = "315920d2221047a490a5c1cb32e531ed"
         self.service_region = "eastasia"
         self.speeker = "zh-CN-XiaoxiaoNeural"
-        self.speeker_style = 'newscast'
+        # 扮演角色
+        self.speeker_role = "YoungAdultMale"
         # 可选风格 "narration-relaxed","embarrassed","fearful","cheerful","disgruntled",
         # "serious","angry",sad","depressed","chat",assistant","newscast"
+        self.speeker_style = 'cheerful'
+        self.speeker_rate = '+10.00%'
+        # 风格强度
+        self.styledegree = 1.3
         self.url = f"https://{self.service_region}.tts.speech.microsoft.com/cognitiveservices/v1"
         self.headers = {
             "Ocp-Apim-Subscription-Key": f"{self.speech_key}",
@@ -37,7 +42,9 @@ class TTSCommand(BaseCommand):
             xmlns:emo="http://www.w3.org/2009/10/emotionml" version="1.0" xml:lang="zh-CN">
             <voice name="{self.speeker}"  xml:gender='Female' xml:lang='zh-CN'>
                 <s/>
-                <mstts:express-as style="{self.speeker_style}">{word}</mstts:express-as>
+                <mstts:express-as role="{self.speeker_role}" style="{self.speeker_style}" styledegree="1.4 >
+                    <prosody rate="+10.00%">{word}</prosody>
+                </mstts:express-as>
                 <s/>
             </voice>
         </speak>
