@@ -1,15 +1,17 @@
-import itchat
-from itchat.content import *
-import xml.etree.ElementTree as ET
-import logging
 import argparse
 import json
+import logging
 import sqlite3
+import xml.etree.ElementTree as ET
+
+import itchat
 import requests
+from itchat.content import *
+from revChatGPT.V1 import Chatbot
+
 from command import factory
 from common import Struct, Logger
-from storage import ChatGPTChat,  Message, Model, SQLiteDB, WeChatUser
-from revChatGPT.V1 import Chatbot
+from storage import ChatGPTChat, Message, Model, SQLiteDB, WeChatUser
 
 CHATBOT = '''
 请充当一个刚满十八岁可爱俏皮的少女，名为小爱，父母是软件工程师。
@@ -50,7 +52,7 @@ def upload_qr(uuid, status, qrcode):
     log.info(f'loginURL:{url}')
 
 
-class Chat():
+class Chat:
     def __init__(self, chatbot, role=None, title=None, conversation_id=None, parent_id=None) -> None:
         self.conversation_id = conversation_id
         self.parent_id = parent_id
@@ -83,7 +85,6 @@ class Chat():
 
 class ChatGPT():
     def __init__(self, token, proxy, paid=False) -> None:
-
         config = {
             "access_token": token, "proxy": proxy, "paid": paid
         }
@@ -94,7 +95,6 @@ class ChatGPT():
         return chat
 
     def re_chat(self, conversation_id, parent_id, title) -> Chat:
-
         self.chatbot.get_msg_history(
             convo_id=conversation_id, encoding='utf-8')
         chat = Chat(
@@ -105,7 +105,7 @@ class ChatGPT():
         return chat
 
 
-class WeChatGPT():
+class WeChatGPT:
 
     def __init__(self):
         parser = argparse.ArgumentParser(description='WeChatGPT')
@@ -122,7 +122,7 @@ class WeChatGPT():
                 custom_level = logging.INFO
         if self.args.verbose:
             custom_level = logging.DEBUG
-        log = Logger(name=self.__class__.__name__,level=custom_level)
+        log = Logger(name=self.__class__.__name__, level=custom_level)
 
         self.db = SQLiteDB(self.config.database)
         Model.initialize(self.db)
@@ -159,7 +159,7 @@ class WeChatGPT():
             message.fromUserName = msg.user.NickName
             message.toUserName = "ME"
         message.save()
-        
+
         if self.is_command(msg):
             return self.handler_command(msg, isGroup)
 
@@ -175,28 +175,28 @@ class WeChatGPT():
             chatname = msg.user.remarkName
         # 查询会话是否存在
         data = ChatGPTChat.fetch_one(f'name=?', (chatname,))
-
-        # 存在旧有会话
-        if data is not None:
-            log.info(
-                f'{data.title}:{data.conversation_id},{data.parent_id}[{msg.text}]')
-            chat = self.gptbot.re_chat(
-                data.conversation_id, data.parent_id, data.title)
-        else:
-            # 不存在旧有会话
-            title = f'和{chatname}的聊天'
-            # 新建会话
-            chat = self.gptbot.new_chat(role)
-
         # 信息处理
         try:
+            # 存在旧有会话
+            if data is not None:
+                log.info(
+                    f'{data.title}:{data.conversation_id},{data.parent_id}[{msg.text}]')
+                chat = self.gptbot.re_chat(
+                    data.conversation_id, data.parent_id, data.title)
+            else:
+                # 不存在旧有会话
+                title = f'和{chatname}的聊天'
+                # 新建会话
+                chat = self.gptbot.new_chat(role)
             if isGroup:
                 message = f'{msg.actualNickName}:{msg.text}'
             else:
                 message = msg.text
             resp = chat.replay(message)
-        except requests.exceptions.HTTPError:
-            return '网络错误,请联系技术支持'
+        except requests.exceptions.HTTPError as e:
+            admin = itchat.search_friends(nickName='半颗白菜')[0]
+            itchat.send_msg(f'error: {e}', toUserName=admin.UserName)
+            return 'Network error, engineer is working hard to fix it;\n网络错误,工程师小哥正在努力修复'
 
         # 存在旧有会话
         if data is not None:
@@ -295,5 +295,3 @@ if __name__ == "__main__":
         weChatGPT.run()
     except KeyboardInterrupt:
         log.info("bye!")
-
-
