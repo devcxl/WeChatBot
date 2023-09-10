@@ -1,8 +1,8 @@
 from .base_command import BaseCommand
 
 
-class CommandFactory():
-    '''命令工厂'''
+class CommandFactory:
+    """命令工厂"""
 
     def __init__(self) -> None:
         self.commands = {}

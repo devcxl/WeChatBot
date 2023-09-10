@@ -3,7 +3,7 @@ from .base_command import BaseCommand
 
 
 class GroupCommand(BaseCommand):
-    '''群组'''
+    """群组"""
 
     def __init__(self) -> None:
         super().__init__()

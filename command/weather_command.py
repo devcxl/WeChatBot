@@ -1,11 +1,12 @@
-import requests
 import json
+
+import requests
 
 from .base_command import BaseCommand
 
 
 class WeatherCommand(BaseCommand):
-    '''天气'''
+    """天气"""
 
     def __init__(self) -> None:
         self.key = 'b07a3300faadd38f99f1b10b0f9d9a25'
