@@ -1,11 +1,13 @@
-from .base_command import BaseCommand
-import os
-import requests
 import logging as log
+import os
+
+import requests
+
+from .base_command import BaseCommand
 
 
 class TTSCommand(BaseCommand):
-    '''群组'''
+    """群组"""
 
     def __init__(self) -> None:
         self.speech_key = "315920d2221047a490a5c1cb32e531ed"
@@ -58,7 +60,6 @@ class TTSCommand(BaseCommand):
             return file
         else:
             log.error(f"请求失败，状态码：{response.status_code}")
-
 
     # todo
     def pamon_vtis(self, word):

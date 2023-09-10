@@ -1,5 +1,6 @@
-import sqlite3
 import logging as log
+import sqlite3
+
 
 class SQLiteDB:
     def __init__(self, db_name):
@@ -52,7 +53,7 @@ class Model:
     @classmethod
     def create_table(cls):
         columns = ', '.join([f"{column} {data_type}" for column,
-                            data_type in cls.__dict__.items() if not column.startswith('__')])
+        data_type in cls.__dict__.items() if not column.startswith('__')])
         create_table_query = f"CREATE TABLE IF NOT EXISTS {cls.__name__} (id INTEGER PRIMARY KEY AUTOINCREMENT, {columns},create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,update_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
         log.debug(f'{cls.__name__}: {create_table_query}')
         cls.db.execute(create_table_query)
@@ -152,6 +153,7 @@ class WeChatUser(Model):
     status = "INTEGER DEFAULT 0"
     # UPDATE user SET status = 1 WHERE wechat_id = '{wechat_id}';
 
+
 class Message(Model):
     msg_id = "INTEGER"  # MsgId
     toUserName = "TEXT"  # NickName  # me
@@ -165,7 +167,6 @@ class WeiBoHotHistory(Model):
 
 
 if __name__ == "__main__":
-
     db = SQLiteDB('new.sqlite')
     Model.initialize(db)
     Message.create_table()
