@@ -9,6 +9,7 @@ import openai
 import requests
 from itchat.content import *
 
+from command import factory
 from common import Struct, Logger
 from storage import ChatGPTChat, Message, Model, SQLiteDB, WeChatUser
 
@@ -100,8 +101,50 @@ class WeChatGPT:
                           statusStorageDir=self.config.cookie)
         log.info("init successful!")
 
+    def is_command(self, msg):
+        """判断是否为命令"""
+        content = msg.text
+        if content.startswith('/'):
+            commands = content.split(' ')
+            command_name = commands[0]
+            try:
+                factory.getCommand(command_name)
+                return True
+            except ValueError as e:
+                log.error(f'error_command:{str(e)}', )
+                return False
+
+    def handler_command(self, msg, isGroup=False):
+        """处理命令"""
+        content = msg.text
+        if content.startswith('/'):
+            commands = content.split(' ')
+            command_name = commands[0]
+            try:
+                executor = factory.getCommand(command_name)
+                command_resp = executor.execute(msg.user, commands, isGroup)
+                return command_resp
+            except Exception as e:
+                log.error(f'执行命令失败：{str(e)}')
+
     def handler_msg(self, msg):
         """处理消息"""
+
+        # 已经处理过的消息不进行处理
+        flag = Message.fetch_one(f'msg_id=?', (msg.MsgId,))
+        if flag is not None:
+            return
+
+        message = Message()
+        message.context = msg.text
+        message.msg_id = msg.MsgId
+        message.fromUserName = msg.user.NickName
+        message.toUserName = "ME"
+        message.save()
+
+        if self.is_command(msg):
+            return self.handler_command(msg)
+
         messages = [{"role": "system", "content": self.config.defaultRole}, {"role": "user", "content": msg.text}]
         response = openai.ChatCompletion.create(
             model=self.config.model,
