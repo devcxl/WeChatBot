@@ -1,7 +1,5 @@
-pypng
-PyQRCode
 requests
-revChatGPT
+openai
 itchat-uos
 pyinstaller
 beautifulsoup4
