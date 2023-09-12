@@ -22,7 +22,7 @@ class WeatherCommand(BaseCommand):
             return self.currentWeather(f'{params[1]}')
 
     def geoCode(self, address):
-        '''根据地址查询出地址的地理信息'''
+        """根据地址查询出地址的地理信息"""
         AdCodeApi = f'https://restapi.amap.com/v3/geocode/geo?key={self.key}&address={address}'
         res = requests.get(AdCodeApi)
         if res.status_code == 200:
