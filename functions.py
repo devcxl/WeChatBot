@@ -12,13 +12,13 @@ def get_current_weather(function_args):
 function_list = [
     {
         "name": "get_current_weather",
-        "description": "Get the current weather in a given location",
+        "description": "获取给定位置的当前天气",
         "parameters": {
             "type": "object",
             "properties": {
                 "location": {
                     "type": "string",
-                    "description": "The city and state, e.g. San Francisco, CA",
+                    "description": "位置：城市，县， 例如：北京",
                 }
             },
             "required": ["location"],
