@@ -16,27 +16,6 @@ from functions import get_current_weather, function_list,available_functions
 
 log = Logger('wechatbot')
 
-
-def upload_image_bytes(bytes):
-    try:
-        files = {'smfile': bytes}
-        url = 'https://smms.app/api/v2/upload'
-        headers = {'Authorization': 'n5aRWU7BNLzK8fqyrXXOLXemSlQOm5tX'}
-        res = requests.post(
-            url, files=files, headers=headers).json()
-        if res['success']:
-            return res['data']['url']
-        else:
-            raise Exception(res['message'])
-    except Exception as e:
-        print(e)
-
-
-def upload_qr(uuid, status, qrcode):
-    url = upload_image_bytes(qrcode)
-    log.info(f'loginURL:{url}')
-
-
 class WeChatGPT:
 
     def __init__(self):
@@ -69,7 +48,7 @@ class WeChatGPT:
         openai.proxy = {"http": self.config.proxy, "https": self.config.proxy}
         openai.api_key = self.config.token
         self.functions = function_list
-        itchat.auto_login(picDir=self.config.qr, hotReload=True, qrCallback=upload_qr,
+        itchat.auto_login(picDir=self.config.qr, hotReload=True,
                           statusStorageDir=self.config.cookie)
         log.info("init successful!")
 
