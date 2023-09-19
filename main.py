@@ -16,6 +16,7 @@ from functions import get_current_weather, function_list,available_functions
 
 log = Logger('wechatbot')
 
+
 class WeChatGPT:
 
     def __init__(self):
@@ -76,7 +77,7 @@ class WeChatGPT:
                 command_resp = executor.execute(msg.user, commands, isGroup)
                 return command_resp
             except Exception as e:
-                log.error(f'执行命令失败：{str(e)}')
+                return f'执行命令失败：{str(e)}'
 
     def handler_msg(self, msg):
         """处理消息"""
