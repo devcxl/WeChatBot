@@ -7,7 +7,7 @@ block_cipher = None
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[('./.env/lib/python3.11/site-packages/tls_client/dependencies/tls-client-x86.so','tls_client/dependencies')],
+    binaries=[],
     datas=[],
     hiddenimports=[],
     hookspath=[],
