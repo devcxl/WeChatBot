@@ -5,7 +5,7 @@ from functions import function_list, available_functions
 
 class Conversation:
 
-    def __init__(self, model, prompt, num_of_round):
+    def __init__(self, prompt, num_of_round, model='gpt-3.5-turbo-0613'):
         self.prompt = prompt
         self.model = model
         self.num_of_round = num_of_round

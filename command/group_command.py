@@ -14,6 +14,9 @@ class GroupCommand(BaseCommand):
     def execute(self, user=None, params=None, isGroup=False):
         resp = ''
         chatrooms = itchat.get_chatrooms(True)
+        frients = itchat.get_friends(True)
         for c in chatrooms:
+            resp += f'{c.NickName}\n'
+        for c in frients:
             resp += f'{c.NickName}\n'
         return resp
