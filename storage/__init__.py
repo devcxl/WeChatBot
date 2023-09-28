@@ -124,10 +124,14 @@ class Model:
         return instances
 
 
-class ChatGPTConfig(Model):
-    email = "TEXT"
-    password = "TEXT"
-    access_token = "TEXT"
+
+class Users(Model):
+    user_name = "TEXT"
+    role = "TEXT"
+
+
+class GPTConfig(Model):
+    apiKey = "TEXT"
     proxy = "TEXT"
 
 
