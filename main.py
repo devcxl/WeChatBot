@@ -48,6 +48,9 @@ class WeChatGPT:
 
         openai.proxy = {"http": self.config.proxy, "https": self.config.proxy}
         openai.api_key = self.config.token
+        # 设置自定义API
+        if self.config.api_base is not None:
+            openai.api_base = self.config.api_base
         self.functions = function_list
         itchat.auto_login(picDir=self.config.qr, hotReload=True,
                           statusStorageDir=self.config.cookie)
