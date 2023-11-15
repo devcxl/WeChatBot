@@ -3,4 +3,8 @@ openai
 itchat-uos
 pyinstaller
 beautifulsoup4
+pydantic
+PyYAML
+sqlalchemy
+
 # git+https://github.com/devcxl/wechat-api.git
