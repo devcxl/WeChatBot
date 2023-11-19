@@ -1,7 +1,7 @@
+import logging
 from abc import ABC
-from common import Logger
 
-log = Logger('wechatbot')
+log = logging.getLogger('email')
 
 
 class BaseCommand(ABC):

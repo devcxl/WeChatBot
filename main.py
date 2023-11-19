@@ -1,56 +1,27 @@
 import argparse
 import json
 import logging
-import sqlite3
 import xml.etree.ElementTree as ET
 
 import itchat
 import openai
-import requests
 from itchat.content import *
 
 from command import factory
-from common import Struct, Logger
-from storage import ChatGPTChat, Message, Model, SQLiteDB, WeChatUser
-from functions import get_current_weather, function_list,available_functions
+from database import get_db
 
-log = Logger('wechatbot')
+from functions import function_list,available_functions
+
+
+
+
+log = logging.getLogger('main')
 
 
 class WeChatGPT:
 
     def __init__(self):
-        parser = argparse.ArgumentParser(description='WeChatGPT')
-        parser.add_argument('--config', '-f', required=True,
-                            type=str, help="配置文件路径")
-        parser.add_argument('--verbose', '-v',
-                            action='store_true', help='是否启用详细模式')
-        # 解析命令行参数
-        self.args = parser.parse_args()
-        if self.args.config:
-            with open(self.args.config) as file:
-                self.config_dict = json.load(file)
-                self.config = Struct(self.config_dict)
-                custom_level = logging.INFO
-        if self.args.verbose:
-            custom_level = logging.DEBUG
-        log = Logger(name=self.__class__.__name__, level=custom_level)
 
-        self.db = SQLiteDB(self.config.database)
-        Model.initialize(self.db)
-        try:
-            ChatGPTChat.create_table()
-            WeChatUser.create_table()
-            Message.create_table()
-        except sqlite3.OperationalError as e:
-            print(e)
-            pass
-
-        openai.proxy = {"http": self.config.proxy, "https": self.config.proxy}
-        openai.api_key = self.config.token
-        # 设置自定义API
-        if self.config.api_base is not None:
-            openai.api_base = self.config.api_base
         self.functions = function_list
         itchat.auto_login(picDir=self.config.qr, hotReload=True,
                           statusStorageDir=self.config.cookie)
