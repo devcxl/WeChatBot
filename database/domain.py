@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, ForeignKey, Boolean
 from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -31,6 +31,16 @@ class Conversation(Base):
     content = Column(String, nullable=False)
     timestamp = Column(DateTime, default=func.now())
     user_id = Column(Integer, nullable=False)
+
+
+class Message(Base):
+    __tablename__ = 'message'
+    id = Column(Integer, primary_key=True, index=True)
+    type = Column(String, default='text')  # image voice video
+    content = Column(String, nullable=False)  # text: message_content other: file_path
+    timestamp = Column(DateTime, default=func.now())
+    user_id = Column(Integer, nullable=False)
+    replay = Column(Boolean, nullable=False, default=False)
 
 
 Base.metadata.create_all(bind=engine)
