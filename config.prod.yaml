@@ -1,0 +1,19 @@
+log:
+    file: ./target/app.log
+    level: INFO
+
+database: mysql+pymysql://root:123456@localhost/test
+
+openai:
+    api_base: http://127.0.0.1/v1/c
+    api_key: sk-asdasdasdasdasd
+    model: sk-asdasdasdasdasd
+    default_prompt: 'asdasd'
+    proxy: http://127.0.0.8085
+
+email:
+    smtp_server: smtp.qq.com
+    smtp_port: 465
+    sender_email: pipimeme-ci-stop@qq.com
+    sender_password: tcpeqsyrgxnbdbhd
+

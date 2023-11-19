@@ -9,7 +9,7 @@ log = logging.getLogger('config')
 
 
 class LogSetting(BaseModel):
-    log_file: str = Field(
+    file: str = Field(
         default='./app.log', description='日志文件保存地址'
     )
     level: str = Field(
@@ -34,18 +34,6 @@ class EmailSetting(BaseModel):
     # 发件人的邮箱和密码
     sender_email: str = Field(description="SMTP发件人")
     sender_password: str = Field(description="SMTP密码")
-
-
-class MeiliSearchSetting(BaseModel):
-    search_host: str = Field(
-        default='http://127.0.0.1:7700', description='搜索引擎访问地址'
-    )
-    search_key: str = Field(
-        description='搜索引擎访问Key'
-    )
-    search_index: str = Field(
-        description='搜索索引名称'
-    )
 
 
 class Setting(BaseModel):
