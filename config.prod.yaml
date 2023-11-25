@@ -1,13 +1,15 @@
 log:
-    file: ./target/app.log
+    file: /var/logs/chatbot/app.log
     level: INFO
 
-database: mysql+pymysql://root:123456@localhost/test
+
+
+database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.0.4.13/chatbot
 
 openai:
     api_base: http://127.0.0.1/v1/c
-    api_key: sk-asdasdasdasdasd
-    model: sk-asdasdasdasdasd
+    api_key: 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
+    model: gpt-3.5-turbo
     default_prompt: 'asdasd'
     proxy: http://127.0.0.8085
 
