@@ -6,5 +6,5 @@ beautifulsoup4
 pydantic
 PyYAML
 sqlalchemy
-
+pymysql
 # git+https://github.com/devcxl/wechat-api.git

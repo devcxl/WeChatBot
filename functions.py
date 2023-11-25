@@ -23,7 +23,22 @@ function_list = [
             },
             "required": ["location"],
         },
+    },
+    {
+        "name": "generate_voice",
+        "description": "根据给定内容生成语音",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "context": {
+                    "type": "string",
+                    "description": "内容：一段文本。一个短句 例如：今天天气真好，我们一起去玩吧。",
+                }
+            },
+            "required": ["context"],
+        },
     }
+
 ]
 
 available_functions = {
