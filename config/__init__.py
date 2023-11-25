@@ -53,24 +53,19 @@ class Setting(BaseModel):
     )
 
 
-def load_config(config_file: str, format: str):
+def load_config(config_file: str):
     """加载配置文件"""
     log.info(f'加载配置文件:{config_file}')
     if config_file:
         with open(config_file) as file:
-            if format == 'json':
-                return Setting.model_validate_json(file.read(), strict=True)
-            elif format == 'yaml':
-                config_data = yaml.safe_load(file.read())
-                json_data = json.dumps(config_data)
-                return Setting.model_validate_json(json_data, strict=True)
+            config_data = yaml.safe_load(file.read())
+            json_data = json.dumps(config_data)
+            return Setting.model_validate_json(json_data, strict=True)
 
 
 parser = argparse.ArgumentParser(description='Pipimeme')
 parser.add_argument('--config', '-f', required=True,
                     type=str, help="配置文件路径")
-parser.add_argument('--format', '-t', default='json',
-                    type=str, help="配置文件格式化类型。可选：json（默认），yaml")
 args = parser.parse_args()
 
-conf = load_config(args.config, args.format)
+conf = load_config(args.config)
