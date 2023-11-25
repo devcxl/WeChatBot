@@ -1,0 +1,21 @@
+log:
+    file: ./app.log
+    level: INFO
+
+voice_path: ./
+
+database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.8.0.1/test
+
+openai:
+    api_base: https://127.0.0.1/v1/c
+    api_key: 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
+    model: gpt-3.5-turbo
+    default_prompt: ''
+    proxy: http://127.0.0.1:8085
+
+email:
+    smtp_server: smtp.qq.com
+    smtp_port: 465
+    sender_email: pipimeme-ci-stop@qq.com
+    sender_password: tcpeqsyrgxnbdbhd
+
