@@ -1,4 +1,3 @@
-import argparse
 import json
 import logging
 import xml.etree.ElementTree as ET
@@ -7,13 +6,9 @@ import itchat
 import openai
 from itchat.content import *
 
-from command import factory
-from database import get_db
-
-from functions import function_list,available_functions
-
-
-
+import config
+from functions import function_list, available_functions
+from handler.text import handler_text
 
 log = logging.getLogger('main')
 
@@ -21,94 +16,19 @@ log = logging.getLogger('main')
 class WeChatGPT:
 
     def __init__(self):
-
         self.functions = function_list
-        itchat.auto_login(picDir=self.config.qr, hotReload=True,
-                          statusStorageDir=self.config.cookie)
+        itchat.auto_login(picDir='./qr.png', hotReload=True,
+                          statusStorageDir='./tmp.ipkl')
+        openai.api_key = config.conf.openai.api_key
+        openai.proxy = config.conf.openai.proxy
         log.info("init successful!")
-
-    def is_command(self, msg):
-        """判断是否为命令"""
-        content = msg.text
-        if content.startswith('/'):
-            commands = content.split(' ')
-            command_name = commands[0]
-            try:
-                factory.getCommand(command_name)
-                return True
-            except ValueError as e:
-                log.error(f'error_command:{str(e)}', )
-                return False
-
-    def handler_command(self, msg, isGroup=False):
-        """处理命令"""
-        content = msg.text
-        if content.startswith('/'):
-            commands = content.split(' ')
-            command_name = commands[0]
-            try:
-                executor = factory.getCommand(command_name)
-                command_resp = executor.execute(msg.user, commands, isGroup)
-                return command_resp
-            except Exception as e:
-                return f'执行命令失败：{str(e)}'
-
-    def handler_msg(self, msg):
-        """处理消息"""
-
-        # 已经处理过的消息不进行处理
-        flag = Message.fetch_one(f'msg_id=?', (msg.MsgId,))
-        if flag is not None:
-            return
-
-        message = Message()
-        message.context = msg.text
-        message.msg_id = msg.MsgId
-        message.fromUserName = msg.user.NickName
-        message.toUserName = "ME"
-        message.save()
-
-        if self.is_command(msg):
-            return self.handler_command(msg)
-
-        messages = [{"role": "system", "content": self.config.defaultRole}, {"role": "user", "content": msg.text}]
-        try:
-            response = openai.ChatCompletion.create(
-                model=self.config.model,
-                messages=messages,
-                functions=self.functions,
-                function_call="auto",
-            )
-            response_message = response["choices"][0]["message"]
-            if response_message.get("function_call"):
-                function_name = response_message["function_call"]["name"]
-                function_to_call = available_functions[function_name]
-                function_args = json.loads(response_message["function_call"]["arguments"])
-                log.info(f'func:{function_name},args:{function_args}')
-                function_response = function_to_call(function_args)
-                messages.append(response_message)
-                messages.append(
-                    {
-                        "role": "function",
-                        "name": function_name,
-                        "content": function_response,
-                    }
-                )
-                second_response = openai.ChatCompletion.create(
-                    model=self.config.model,
-                    messages=messages,
-                )
-                return str(second_response["choices"][0]["message"]['content'])
-            else:
-                return str(response["choices"][0]["message"]['content'])
-        except openai.error.RateLimitError as e:
-            return '请求限制，每分钟3次'
 
     def run(self):
         @itchat.msg_register(FRIENDS)
         def add_friend(msg):
             """自动同意好友"""
             # 解析XML文本
+            print(msg.content)
             root = ET.fromstring(msg.content)
             # 获取alias、bigheadimgurl和snsbgimgid的值
             wechat_id = root.get('alias')
@@ -118,18 +38,41 @@ class WeChatGPT:
             nick_name = root.get('fromnickname')
             content = root.get('content')
             # itchat.accept_friend(msg.user.userName, ticket)
+            user = itchat.search_friends(remarkName='u155')[0]
+            itchat.send_msg(f'{nick_name}({wechat_id})请求添加好友：{content}', user.userName)
             log.info(f'{nick_name}({wechat_id})请求添加好友：{content}')
+            msg.user.verify()
 
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-            return self.handler_msg(msg)
 
-        @itchat.msg_register(TEXT, isGroupChat=True)
-        def groups(msg):
-            """处理群聊消息"""
-            if msg.isAt:
-                return self.handler_msg(msg)
+            tmp_uid: str = msg.user.RemarkName
+            content: str = msg.text
+            user_id = int(tmp_uid.replace('u', ''))
+
+            print(user_id)
+            return handler_text(msg_id=msg.MsgId, user_id=user_id, content=content)
+
+        @itchat.msg_register(VOICE)
+        def friend(msg):
+            """处理私聊消息"""
+            msg.download(msg.fileName)
+            tmp_uid: str = msg.user.RemarkName
+            user_id = int(tmp_uid.replace('u', ''))
+            audio_file = open(msg.fileName, "rb")
+            transcript = openai.Audio.transcribe(
+                model="whisper-1",
+                file=audio_file
+            )
+            content = transcript.text
+            return handler_text(msg_id=msg.MsgId, user_id=user_id, content=content)
+
+        # @itchat.msg_register(TEXT, isGroupChat=True)
+        # def groups(msg):
+        #     """处理群聊消息"""
+        #     if msg.isAt:
+        #         return self.handler_msg(msg)
 
         itchat.run()
 
