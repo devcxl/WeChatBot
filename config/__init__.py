@@ -45,6 +45,8 @@ class Setting(BaseModel):
 
     email: EmailSetting = Field(description="Email setting")
 
+    voice_path: str = Field(description='语音文件保存路径')
+
     database: str = Field(
         default='sqlite:///./pipimeme.sqlite', description='数据库，支持SQLite、MySQL'
     )

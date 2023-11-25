@@ -2,7 +2,7 @@ log:
     file: /var/logs/chatbot/app.log
     level: INFO
 
-
+voice_path: /var/apps/chatbot/voices/
 
 database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.0.4.13/chatbot
 
