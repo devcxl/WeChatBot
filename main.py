@@ -28,7 +28,7 @@ class WeChatGPT:
         def add_friend(msg):
             """自动同意好友"""
             # 解析XML文本
-            print(msg.content)
+            # print(msg.content)
             root = ET.fromstring(msg.content)
             # 获取alias、bigheadimgurl和snsbgimgid的值
             wechat_id = root.get('alias')
@@ -50,8 +50,6 @@ class WeChatGPT:
             tmp_uid: str = msg.user.RemarkName
             content: str = msg.text
             user_id = int(tmp_uid.replace('u', ''))
-
-            print(user_id)
             return handler_text(msg_id=msg.MsgId, user_id=user_id, content=content)
 
         @itchat.msg_register(VOICE)

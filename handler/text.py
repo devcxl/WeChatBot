@@ -1,7 +1,9 @@
 import json
 import logging
+import time
 
 import openai
+from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
 import config
@@ -21,9 +23,24 @@ def handler_text(msg_id: str, user_id: int, content: str):
     else:
         current_user: User = db.query(User).filter(User.id == user_id).first()
         if current_user:
-            messages = [{"role": "system", "content": current_user.default_prompt},
-                        {"role": "user", "content": content}]
 
+            messages_from_db = db.query(Message).filter(Message.user_id == current_user.id).order_by(
+                desc(Message.timestamp)).limit(10).all()
+            messages = [{"role": "system", "content": current_user.default_prompt}]
+
+            for message in messages_from_db:
+                if message.replay:
+                    messages.append({
+                        "role": "assistant",
+                        "content": message.content
+                    })
+                else:
+                    messages.append({
+                        "role": "user",
+                        "content": message.content
+                    })
+
+            messages.append({"role": "user", "content": content})
             try:
                 response = openai.ChatCompletion.create(
                     model=config.conf.openai.model,
@@ -52,10 +69,23 @@ def handler_text(msg_id: str, user_id: int, content: str):
                         model=config.conf.openai.model,
                         messages=messages,
                     )
-                    return str(second_response["choices"][0]["message"]['content'])
+
+                    resp = str(second_response["choices"][0]["message"]['content'])
+                    return resp
                 else:
-                    return str(response["choices"][0]["message"]['content'])
+                    resp = str(response["choices"][0]["message"]['content'])
+                    presave = Message(type='text', content=content, timestamp=func.now(), user_id=user_id)
+                    db.add(presave)
+                    db.commit()
+                    db.refresh(presave)
+
+                    msg = Message(type='text', content=resp, timestamp=func.now(), user_id=user_id,
+                                  replay=True)
+                    db.add(msg)
+                    db.commit()
+                    db.refresh(msg)
+                    db.close()
+                    return resp
 
             except openai.error.RateLimitError as e:
                 return '请求限制，每分钟3次'
-
