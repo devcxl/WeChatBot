@@ -19,6 +19,8 @@ logging.basicConfig(
     handlers=handlers
 )
 
+log = logging.getLogger('LoadBalancer')
+
 
 class LoadBalancer:
     def __init__(self, items: List[str]):
@@ -31,4 +33,5 @@ class LoadBalancer:
 
         next_item = self.items[self.current_index]
         self.current_index = (self.current_index + 1) % len(self.items)
+        log.debug(f'current_apikey: {next_item}')
         return next_item
