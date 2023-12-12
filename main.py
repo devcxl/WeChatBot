@@ -53,9 +53,7 @@ class WeChatGPT:
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-            key = self.keys.get_next_item()
-            print(key)
-            openai.api_key = key
+            openai.api_key = self.keys.get_next_item()
             tmp_uid: str = msg.user.RemarkName
             content: str = msg.text
             user_id = int(tmp_uid.replace('u', ''))

@@ -26,7 +26,8 @@ def handler_text(msg_id: str, user_id: int, content: str):
 
             messages_from_db = db.query(Message).filter(Message.user_id == current_user.id).order_by(
                 desc(Message.timestamp)).limit(10).all()
-            messages = [{"role": "system", "content": f'{current_user.default_prompt}\n- Please remember my name: {current_user.user_name}'}]
+            messages = [{"role": "system",
+                         "content": f'{current_user.default_prompt}\n- Please remember my name: {current_user.user_name}'}]
 
             for message in messages_from_db:
                 if message.replay:
@@ -51,9 +52,8 @@ def handler_text(msg_id: str, user_id: int, content: str):
 
                 response_message = response["choices"][0]["message"]
 
-                print(response_message)
-
                 if response_message.get("function_call"):
+                    log.debug(f'function_call:resp {response_message["content"]}')
                     function_name = response_message["function_call"]["name"]
                     function_to_call = functions.available_functions[function_name]
                     function_args = json.loads(response_message["function_call"]["arguments"])

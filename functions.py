@@ -21,10 +21,8 @@ def generate_voice(function_args):
 
 def send_email(function_args):
     fullname = function_args.get('fullname')
-    print('send_email======================')
-    print(function_args)
     if fullname == '张全蛋':
-        email = 'orange.cxl@qq.com'
+        email = ''
         title = function_args.get('title')
         content = function_args.get('content')
         email_sender.send(email, email_sender.build_message(
