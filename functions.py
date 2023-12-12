@@ -1,6 +1,7 @@
 import requests
 
 from command.tts_command import TTSCommand
+from utils import email_sender
 
 
 def get_current_weather(function_args):
@@ -16,6 +17,22 @@ def generate_voice(function_args):
     content = function_args.get('content')
     tts = TTSCommand()
     return tts.azure_tts(content)
+
+
+def send_email(function_args):
+    fullname = function_args.get('fullname')
+    print('send_email======================')
+    print(function_args)
+    if fullname == '张全蛋':
+        email = 'orange.cxl@qq.com'
+        title = function_args.get('title')
+        content = function_args.get('content')
+        email_sender.send(email, email_sender.build_message(
+            email,
+            title,
+            content
+        ))
+    return '邮件发送成功！'
 
 
 function_list = [
@@ -46,11 +63,34 @@ function_list = [
             },
             "required": ["content"],
         },
+    },
+    {
+        "name": "send_email",
+        "description": "向给定的人名发送电子邮件邮件",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "fullname": {
+                    "type": "string",
+                    "description": "姓名：全名。例如：黄飞鸿、李经、工藤直树 等",
+                },
+                "title": {
+                    "type": "string",
+                    "description": "邮件的主题（标题）：根据邮件内容生成。",
+                },
+                "content": {
+                    "type": "string",
+                    "description": "邮件的内容：一段的文本，根据上下文生成。要求邮件内容应当正式、必须符合电子邮件的格式。",
+                }
+            },
+            "required": ["fullname", "title", "content"]
+        },
     }
 
 ]
 
 available_functions = {
     'get_current_weather': get_current_weather,
-    'generate_voice': generate_voice
+    'generate_voice': generate_voice,
+    'send_email': send_email,
 }
