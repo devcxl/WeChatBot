@@ -10,8 +10,8 @@ level = logging.INFO
 if conf.verbose:
     level = logging.DEBUG
 
-if conf.log_file is not None:
-    handlers.append(logging.FileHandler(conf.log_file))
+if conf.log.file is not None:
+    handlers.append(logging.FileHandler(conf.log.file))
 
 logging.basicConfig(
     level=level,  # 设置日志级别

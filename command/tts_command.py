@@ -3,10 +3,8 @@ import os
 
 import requests
 
-from .base_command import BaseCommand
 
-
-class TTSCommand(BaseCommand):
+class TTSCommand:
     """群组"""
 
     def __init__(self) -> None:
@@ -28,15 +26,9 @@ class TTSCommand(BaseCommand):
             "X-Microsoft-OutputFormat": "audio-16khz-128kbitrate-mono-mp3",
             "User-Agent": "ChatBot"
         }
-        self.VOICE_FILE_PATH = '/save/tts/'
+        self.VOICE_FILE_PATH = './tts/'
         os.makedirs(self.VOICE_FILE_PATH, exist_ok=True)
         super().__init__()
-
-    def getCommandName(self):
-        return '/tts'
-
-    def execute(self, user=None, params=None, isGroup=False):
-        return f'@fil@{self.azure_tts(params[1:])}'
 
     def azure_tts(self, word):
         data = f'''
@@ -60,23 +52,3 @@ class TTSCommand(BaseCommand):
             return file
         else:
             log.error(f"请求失败，状态码：{response.status_code}")
-
-    # todo
-    def pamon_vtis(self, word):
-        data = {
-            'content': word,
-            'speed': '1.1'
-        }
-        headers = {
-            'access-token': 'aeb56737b0984338ad5535de8bc3b8e8'
-        }
-        resp = requests.get(
-            'https://live.ci-s.top/api/paimon', data, headers=headers)
-        if resp.status_code == 200:
-            with open('pai.wav', 'wb') as f:
-                f.write(resp.content)
-
-        resp = requests.get(
-            'https://live.ci-s.top/api/paimon/total', headers=headers)
-        if resp.status_code == 200:
-            print(resp.text)

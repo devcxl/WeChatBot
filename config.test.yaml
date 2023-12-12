@@ -7,11 +7,14 @@ voice_path: ./
 database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.8.0.1/test
 
 openai:
-    api_base: https://127.0.0.1/v1/c
-    api_key: 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
-    model: gpt-3.5-turbo
+    api_base: https://openai.linil.cc/v1
+    api_keys:
+        - 'sess-ooP4Li5oNXWWu3mZSBeX3R7IUvnCB66AMtTA0VGP'
+        - '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'
+        - ''
+    model: gpt-3.5-turbo-1106
     default_prompt: ''
-    proxy: http://127.0.0.1:8085
+#    proxy: 'http://127.0.0.1:8086'
 
 email:
     smtp_server: smtp.qq.com

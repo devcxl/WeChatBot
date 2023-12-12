@@ -7,7 +7,8 @@ import openai
 from itchat.content import *
 
 import config
-from functions import function_list, available_functions
+from common import LoadBalancer
+from functions import function_list
 from handler.text import handler_text
 
 log = logging.getLogger('main')
@@ -19,8 +20,14 @@ class WeChatGPT:
         self.functions = function_list
         itchat.auto_login(picDir='./qr.png', hotReload=True,
                           statusStorageDir='./tmp.ipkl')
-        openai.api_key = config.conf.openai.api_key
-        openai.proxy = config.conf.openai.proxy
+        self.keys = LoadBalancer(config.conf.openai.api_keys)
+
+        if config.conf.openai.api_base:
+            openai.api_base = config.conf.openai.api_base
+
+        if config.conf.openai.proxy:
+            openai.proxy = config.conf.openai.proxy
+
         log.info("init successful!")
 
     def run(self):
@@ -46,7 +53,9 @@ class WeChatGPT:
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-
+            key = self.keys.get_next_item()
+            print(key)
+            openai.api_key = key
             tmp_uid: str = msg.user.RemarkName
             content: str = msg.text
             user_id = int(tmp_uid.replace('u', ''))

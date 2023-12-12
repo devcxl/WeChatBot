@@ -1,6 +1,6 @@
 import argparse
 import logging
-
+from typing import List
 import json
 import yaml
 from pydantic import BaseModel, Field
@@ -19,11 +19,12 @@ class LogSetting(BaseModel):
 
 class OpenAISetting(BaseModel):
     """OpenAI的配置"""
-    api_base: str = Field(description='OpenAI接口的地址')
-    api_key: str = Field(description='OpenAI的API_KEY')
+    api_base: str = Field(description='OpenAI接口的地址', default='')
+    # api_key: str = Field(description='OpenAI的API_KEY')
+    api_keys: List[str] = Field(description='OpenAI的API_KEY列表')
     model: str = Field(description='GPT模型')
     default_prompt: str = Field(description='默认提示词')
-    proxy: str = Field(description='http代理')
+    proxy: str = Field(description='http代理', default='')
 
 
 class EmailSetting(BaseModel):
