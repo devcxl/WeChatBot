@@ -1,13 +1,12 @@
 import json
 import logging
-import time
 
 import openai
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
 import config
-import functions
+import function
 from database import SessionLocal
 from database.domain import Message, User
 
@@ -46,7 +45,7 @@ def handler_text(msg_id: str, user_id: int, content: str):
                 response = openai.ChatCompletion.create(
                     model=config.conf.openai.model,
                     messages=messages,
-                    functions=functions.function_list,
+                    functions=function.function_declares,
                     function_call="auto",
                 )
 
@@ -55,9 +54,9 @@ def handler_text(msg_id: str, user_id: int, content: str):
                 if response_message.get("function_call"):
                     log.debug(f'function_call:resp {response_message["content"]}')
                     function_name = response_message["function_call"]["name"]
-                    function_to_call = functions.available_functions[function_name]
+                    function_to_call = function.available_functions[function_name]
                     function_args = json.loads(response_message["function_call"]["arguments"])
-                    log.info(f'func:{function_name},args:{function_args}')
+                    log.info(f'调用方法:{function_name},参数:{function_args}')
                     function_response = function_to_call(function_args)
                     messages.append(response_message)
                     messages.append(

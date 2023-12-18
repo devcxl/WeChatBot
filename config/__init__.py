@@ -5,15 +5,13 @@ import json
 import yaml
 from pydantic import BaseModel, Field
 
-log = logging.getLogger('config')
-
 
 class LogSetting(BaseModel):
     file: str = Field(
-        default='./app.log', description='日志文件保存地址'
+        default=None, description='日志文件保存地址'
     )
-    level: str = Field(
-        default='INFO', description='日志等级'
+    verbose: bool = Field(
+        default=False, description="显示DEBUG日志"
     )
 
 
@@ -37,6 +35,11 @@ class EmailSetting(BaseModel):
     sender_password: str = Field(description="SMTP密码")
 
 
+class AmapSetting(BaseModel):
+    """高德配置"""
+    key: str = Field(description="高德天气预报KEY")
+
+
 class Setting(BaseModel):
     """配置类"""
 
@@ -46,19 +49,18 @@ class Setting(BaseModel):
 
     email: EmailSetting = Field(description="Email setting")
 
+    amap: AmapSetting = Field(description="Amap setting")
+
     voice_path: str = Field(description='语音文件保存路径')
 
     database: str = Field(
         default='sqlite:///./pipimeme.sqlite', description='数据库，支持SQLite、MySQL'
     )
-    verbose: bool = Field(
-        default=False, description="显示DEBUG日志"
-    )
+
 
 
 def load_config(config_file: str):
     """加载配置文件"""
-    log.info(f'加载配置文件:{config_file}')
     if config_file:
         with open(config_file) as file:
             config_data = yaml.safe_load(file.read())

@@ -1,4 +1,3 @@
-import json
 import logging
 import xml.etree.ElementTree as ET
 
@@ -8,7 +7,6 @@ from itchat.content import *
 
 import config
 from common import LoadBalancer
-from functions import function_list
 from handler.text import handler_text
 
 log = logging.getLogger('main')
@@ -17,7 +15,6 @@ log = logging.getLogger('main')
 class WeChatGPT:
 
     def __init__(self):
-        self.functions = function_list
         itchat.auto_login(picDir='./qr.png', hotReload=True,
                           statusStorageDir='./tmp.ipkl')
         self.keys = LoadBalancer(config.conf.openai.api_keys)
