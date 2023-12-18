@@ -1,4 +1,6 @@
 requests
+pyqrcode
+pypng
 openai
 pyinstaller
 beautifulsoup4
