@@ -26,6 +26,14 @@ class User(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
+class Contract(Base):
+    __tablename__ = 'contract'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False)
+    fullname = Column(String(64), nullable=False)
+    email = Column(String(64), nullable=False)
+
+
 class Message(Base):
     __tablename__ = 'message'
     id = Column(Integer, primary_key=True, index=True)

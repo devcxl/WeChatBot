@@ -1,6 +1,6 @@
 log:
-    file: ./app.log
-    level: INFO
+    verbose: true
+
 
 voice_path: ./
 
@@ -9,12 +9,12 @@ database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.8.0.1/test
 openai:
     api_base: https://openai.linil.cc/v1
     api_keys:
-        - 'sess-ooP4Li5oNXWWu3mZSBeX3R7IUvnCB66AMtTA0VGP'
-        - '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'
-        - ''
+        - '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' # unknow
+        - 'sess-ooP4Li5oNXWWu3mZSBeX3R7IUvnCB66AMtTA0VGP' # plp
+        - 'sess-iMF70PFwjxdkOcuE9bqfhoG5UPw7s6MWubXQhzIy' # bitly
     model: gpt-3.5-turbo-1106
     default_prompt: ''
-#    proxy: 'http://127.0.0.1:8086'
+#    proxy: 'http://127.0.0.1:8085'
 
 email:
     smtp_server: smtp.qq.com
@@ -22,3 +22,7 @@ email:
     sender_email: pipimeme-ci-stop@qq.com
     sender_password: tcpeqsyrgxnbdbhd
 
+
+# 高德地图KEY 用于查询天气
+amap:
+    key: b07a3300faadd38f99f1b10b0f9d9a25
