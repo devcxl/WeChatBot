@@ -22,5 +22,5 @@ class Functions:
 
     def get_all_available(self):
         for function in self.functions:
-            self.available[function.declare().get('name')] = function.execute
+            self.available[function.declare().get('function').get('name')] = function.execute
         return self.available

@@ -58,7 +58,6 @@ class Setting(BaseModel):
     )
 
 
-
 def load_config(config_file: str):
     """加载配置文件"""
     if config_file:

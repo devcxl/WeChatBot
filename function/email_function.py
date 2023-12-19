@@ -28,26 +28,29 @@ class EmailFunction(BaseFunction):
 
     def declare(self) -> dict:
         return {
-            "name": "send_email",
-            "description": "向给定的人名发送电子邮件邮件",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "fullname": {
-                        "type": "string",
-                        "description": "姓名：全名。例如：黄飞鸿、李经、工藤直树 等",
+            "type": "function",
+            "function": {
+                "name": "send_email",
+                "description": "向给定的人名发送电子邮件邮件",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "fullname": {
+                            "type": "string",
+                            "description": "姓名：全名。例如：黄飞鸿、李经、工藤直树 等",
+                        },
+                        "title": {
+                            "type": "string",
+                            "description": "邮件的主题（标题）：根据邮件内容生成。",
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "邮件的内容：一段的文本，根据上下文生成。要求邮件内容应当正式、必须符合电子邮件的格式。",
+                        }
                     },
-                    "title": {
-                        "type": "string",
-                        "description": "邮件的主题（标题）：根据邮件内容生成。",
-                    },
-                    "content": {
-                        "type": "string",
-                        "description": "邮件的内容：一段的文本，根据上下文生成。要求邮件内容应当正式、必须符合电子邮件的格式。",
-                    }
+                    "required": ["fullname", "title", "content"]
                 },
-                "required": ["fullname", "title", "content"]
-            },
+            }
         }
 
     def execute(self, function_args) -> str:

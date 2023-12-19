@@ -6,7 +6,7 @@ log = logging.getLogger('function base')
 
 class BaseFunction(ABC):
     def __init__(self) -> None:
-        log.info(f'函数:{self.declare().get("name")}加载成功！')
+        log.info(f'函数:{self.declare().get("function").get("name")}加载成功！')
 
     def declare(self) -> dict:
         """GPT函数定义"""

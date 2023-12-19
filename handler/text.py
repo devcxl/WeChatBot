@@ -1,12 +1,13 @@
 import json
 import logging
 
-import openai
+from openai import RateLimitError
 from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
 import config
 import function
+from common.load_balancer import balancer
 from database import SessionLocal
 from database.domain import Message, User
 
@@ -14,6 +15,7 @@ log = logging.getLogger('text')
 
 
 def handler_text(msg_id: str, user_id: int, content: str):
+    client = balancer.get_next_item()
     db: Session = SessionLocal()
     message: Message = db.query(Message).filter(Message.id == msg_id).first()
     if message:
@@ -26,7 +28,7 @@ def handler_text(msg_id: str, user_id: int, content: str):
             messages_from_db = db.query(Message).filter(Message.user_id == current_user.id).order_by(
                 desc(Message.timestamp)).limit(10).all()
             messages = [{"role": "system",
-                         "content": f'{current_user.default_prompt}\n- Please remember my name: {current_user.user_name}'}]
+                         "content": f'{current_user.default_prompt}\n- Please remember current user name: {current_user.user_name}'}]
 
             for message in messages_from_db:
                 if message.replay:
@@ -41,40 +43,40 @@ def handler_text(msg_id: str, user_id: int, content: str):
                     })
 
             messages.append({"role": "user", "content": content})
+
             try:
-                response = openai.ChatCompletion.create(
+                response = client.chat.completions.create(
                     model=config.conf.openai.model,
                     messages=messages,
-                    functions=function.function_declares,
-                    function_call="auto",
+                    tools=function.function_declares,
+                    tool_choice="auto"
                 )
+                response_message = response.choices[0].message
+                tool_calls = response_message.tool_calls
+                if tool_calls:
+                    for tool_call in tool_calls:
+                        function_name = tool_call.function.name
+                        function_to_call = function.available_functions[function_name]
+                        function_args = json.loads(tool_call.function.arguments)
+                        function_response = function_to_call(function_args)
+                        messages.append(response_message)
+                        messages.append(
+                            {
+                                "tool_call_id": tool_call.id,
+                                "role": "tool",
+                                "name": function_name,
+                                "content": function_response,
+                            }
+                        )
 
-                response_message = response["choices"][0]["message"]
-
-                if response_message.get("function_call"):
-                    log.debug(f'function_call:resp {response_message["content"]}')
-                    function_name = response_message["function_call"]["name"]
-                    function_to_call = function.available_functions[function_name]
-                    function_args = json.loads(response_message["function_call"]["arguments"])
-                    log.info(f'调用方法:{function_name},参数:{function_args}')
-                    function_response = function_to_call(function_args)
-                    messages.append(response_message)
-                    messages.append(
-                        {
-                            "role": "function",
-                            "name": function_name,
-                            "content": function_response,
-                        }
-                    )
-                    second_response = openai.ChatCompletion.create(
+                    second_response = client.chat.completions.create(
                         model=config.conf.openai.model,
                         messages=messages,
                     )
-
-                    resp = str(second_response["choices"][0]["message"]['content'])
+                    resp = str(second_response.choices[0].message.content)
                     return resp
                 else:
-                    resp = str(response["choices"][0]["message"]['content'])
+                    resp = str(response.choices[0].message.content)
                     presave = Message(type='text', content=content, timestamp=func.now(), user_id=user_id)
                     db.add(presave)
                     db.commit()
@@ -88,5 +90,5 @@ def handler_text(msg_id: str, user_id: int, content: str):
                     db.close()
                     return resp
 
-            except openai.error.RateLimitError as e:
-                return '请求限制，每分钟3次'
+            except RateLimitError as e:
+                return '访问受限，请稍后再试。'

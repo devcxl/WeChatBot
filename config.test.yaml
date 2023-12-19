@@ -1,5 +1,5 @@
 log:
-    verbose: true
+    verbose: false
 
 
 voice_path: ./

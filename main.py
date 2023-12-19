@@ -3,10 +3,11 @@ import xml.etree.ElementTree as ET
 
 import itchat
 import openai
+
+from common.load_balancer import balancer
 from itchat.content import *
 
 import config
-from common import LoadBalancer
 from handler.text import handler_text
 
 log = logging.getLogger('main')
@@ -17,7 +18,6 @@ class WeChatGPT:
     def __init__(self):
         itchat.auto_login(picDir='./qr.png', hotReload=True,
                           statusStorageDir='./tmp.ipkl')
-        self.keys = LoadBalancer(config.conf.openai.api_keys)
 
         if config.conf.openai.api_base:
             openai.api_base = config.conf.openai.api_base
@@ -50,7 +50,6 @@ class WeChatGPT:
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-            openai.api_key = self.keys.get_next_item()
             tmp_uid: str = msg.user.RemarkName
             content: str = msg.text
             user_id = int(tmp_uid.replace('u', ''))
@@ -63,7 +62,8 @@ class WeChatGPT:
             tmp_uid: str = msg.user.RemarkName
             user_id = int(tmp_uid.replace('u', ''))
             audio_file = open(msg.fileName, "rb")
-            transcript = openai.Audio.transcribe(
+            client = balancer.get_next_item()
+            transcript = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=audio_file
             )
