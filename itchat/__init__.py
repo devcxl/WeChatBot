@@ -1,27 +1,10 @@
 from .core import Core
-from .config import VERSION, ASYNC_COMPONENTS
-from .log import set_logging
+from .config import VERSION
 
-if ASYNC_COMPONENTS:
-    from itchat.async_components import load_components
-else:
-    from itchat.components import load_components
 
+from itchat.components import load_components
 
 __version__ = VERSION
-
-
-instanceList = []
-
-def load_async_itchat() -> Core:
-    """load async-based itchat instance
-
-    Returns:
-        Core: the abstract interface of itchat
-    """
-    from itchat.async_components import load_components
-    load_components(Core)
-    return Core()
 
 
 def load_sync_itchat() -> Core:
@@ -34,18 +17,7 @@ def load_sync_itchat() -> Core:
     load_components(Core)
     return Core()
 
-
-if ASYNC_COMPONENTS:
-    instance = load_async_itchat()
-else:
-    instance = load_sync_itchat()
-
-
-instanceList = [instance]
-
-# I really want to use sys.modules[__name__] = originInstance
-# but it makes auto-fill a real mess, so forgive me for my following **
-# actually it toke me less than 30 seconds, god bless Uganda
+instance = load_sync_itchat()
 
 # components.login
 login                       = instance.login
@@ -88,9 +60,9 @@ load_login_status           = instance.load_login_status
 auto_login                  = instance.auto_login
 configured_reply            = instance.configured_reply
 msg_register                = instance.msg_register
+command                     = instance.command
 run                         = instance.run
 # other functions
 search_friends              = instance.search_friends
 search_chatrooms            = instance.search_chatrooms
 search_mps                  = instance.search_mps
-set_logging                 = set_logging

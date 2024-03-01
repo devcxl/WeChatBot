@@ -22,7 +22,7 @@ from ..storage.templates import wrap_user_dict
 from .contact import update_local_chatrooms, update_local_friends
 from .messages import produce_msg
 
-log = logging.getLogger('itchat')
+logger = logging.getLogger('itchat')
 
 
 def load_login(core):
@@ -40,7 +40,7 @@ def load_login(core):
 def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
           loginCallback=None, exitCallback=None):
     if self.alive or self.isLogging:
-        log.warning('itchat has already logged in.')
+        logger.warning('itchat has already logged in.')
         return
     self.isLogging = True
     while self.isLogging:
@@ -48,13 +48,13 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         if uuid:
             qrStorage = io.BytesIO()
         else:
-            log.info('Getting uuid of QR code.')
+            logger.info('Getting uuid of QR code.')
             while not self.get_QRuuid():
                 time.sleep(1)
-            log.info('Downloading QR code.')
+            logger.info('Downloading QR code.')
             qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
                                     picDir=picDir, qrCallback=qrCallback)
-            log.info('Please scan the QR code to log in.')
+            logger.info('Please scan the QR code to log in.')
         isLoggedIn = False
         while not isLoggedIn:
             status = self.check_login()
@@ -65,7 +65,7 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
                 isLoggedIn = True
             elif status == '201':
                 if isLoggedIn is not None:
-                    log.info('Please press confirm on your phone.')
+                    logger.info('Please press confirm on your phone.')
                     isLoggedIn = None
                 time.sleep(0.5)
             elif status != '408':
@@ -73,20 +73,19 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         if isLoggedIn:
             break
         elif self.isLogging:
-            log.info('Log in time out, reloading QR code.')
+            logger.info('Log in time out, reloading QR code.')
     else:
         return  # log in process is stopped by user
-    log.info('Loading the contact, this may take a little while.')
+    logger.info('Loading the contact, this may take a little while.')
     self.web_init()
     self.show_mobile_login()
     self.get_contact(True)
     if hasattr(loginCallback, '__call__'):
         r = loginCallback()
     else:
-        utils.clear_screen()
         if os.path.exists(picDir or config.DEFAULT_QR):
             os.remove(picDir or config.DEFAULT_QR)
-        log.info('Login successfully as %s' % self.storageClass.nickName)
+        logger.info('Login successfully as %s' % self.storageClass.nickName)
     self.start_receiving(exitCallback)
     self.isLogging = False
 
@@ -131,6 +130,10 @@ def get_QR(self, uuid=None, enableCmdQR=False, picDir=None, qrCallback=None):
     else:
         with open(picDir, 'wb') as f:
             f.write(qrStorage.getvalue())
+        if enableCmdQR:
+            utils.print_cmd_qr(qrCode.text(1), enableCmdQR=enableCmdQR)
+        else:
+            utils.print_qr(picDir)
     return qrStorage
 
 
@@ -211,7 +214,7 @@ def process_login_info(core, loginContent):
     #     elif node.nodeName == 'pass_ticket':
     #         core.loginInfo['pass_ticket'] = core.loginInfo['BaseRequest']['DeviceID'] = node.childNodes[0].data
     if not all([key in core.loginInfo for key in ('skey', 'wxsid', 'wxuin', 'pass_ticket')]):
-        log.error(
+        logger.error(
             'Your wechat account may be LIMITED to log in WEB wechat, error info:\n%s' % r.text)
         core.isLogging = False
         return False
@@ -310,7 +313,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                 pass
             except:
                 retryCount += 1
-                log.error(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 if self.receivingRetryCount < retryCount:
                     self.alive = False
                 else:
@@ -319,7 +322,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
         if hasattr(exitCallback, '__call__'):
             exitCallback()
         else:
-            log.info('LOG OUT!')
+            logger.info('LOG OUT!')
     if getReceivingFnOnly:
         return maintain_loop
     else:
@@ -358,7 +361,7 @@ def sync_check(self):
     regx = r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}'
     pm = re.search(regx, r.text)
     if pm is None or pm.group(1) != '0':
-        log.debug('Unexpected sync check result: %s' % r.text)
+        logger.debug('Unexpected sync check result: %s' % r.text)
         return None
     return pm.group(2)
 

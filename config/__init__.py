@@ -1,5 +1,4 @@
 import argparse
-import logging
 from typing import List
 import json
 import yaml
@@ -22,22 +21,8 @@ class OpenAISetting(BaseModel):
     api_keys: List[str] = Field(description='OpenAI的API_KEY列表')
     model: str = Field(description='GPT模型')
     default_prompt: str = Field(description='默认提示词')
+    history: int = Field(description='历史记录轮次')
     proxy: str = Field(description='http代理', default='')
-
-
-class EmailSetting(BaseModel):
-    """电子邮件配置"""
-    smtp_server: str = Field(description="SMTP发送服务器")
-    # 一般为587或者465
-    smtp_port: int = Field(description="SMTP发送服务器端口号")
-    # 发件人的邮箱和密码
-    sender_email: str = Field(description="SMTP发件人")
-    sender_password: str = Field(description="SMTP密码")
-
-
-class AmapSetting(BaseModel):
-    """高德配置"""
-    key: str = Field(description="高德天气预报KEY")
 
 
 class Setting(BaseModel):
@@ -46,16 +31,6 @@ class Setting(BaseModel):
     log: LogSetting = Field(description='Log Setting')
 
     openai: OpenAISetting = Field(description='OpenAI Setting')
-
-    email: EmailSetting = Field(description="Email setting")
-
-    amap: AmapSetting = Field(description="Amap setting")
-
-    voice_path: str = Field(description='语音文件保存路径')
-
-    database: str = Field(
-        default='sqlite:///./pipimeme.sqlite', description='数据库，支持SQLite、MySQL'
-    )
 
 
 def load_config(config_file: str):

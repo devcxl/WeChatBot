@@ -1,28 +1,10 @@
 log:
     verbose: false
 
-
-voice_path: ./
-
-database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.8.0.1/test
-
 openai:
-    api_base: https://openai.linil.cc/v1
+    api_base: https://one-api.devcxl.cn/v1
     api_keys:
-        - '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' # unknow
-        - 'sess-ooP4Li5oNXWWu3mZSBeX3R7IUvnCB66AMtTA0VGP' # plp
-        - 'sess-iMF70PFwjxdkOcuE9bqfhoG5UPw7s6MWubXQhzIy' # bitly
-    model: gpt-3.5-turbo-1106
-    default_prompt: ''
-#    proxy: 'http://127.0.0.1:8085'
-
-email:
-    smtp_server: smtp.qq.com
-    smtp_port: 465
-    sender_email: pipimeme-ci-stop@qq.com
-    sender_password: tcpeqsyrgxnbdbhd
-
-
-# 高德地图KEY 用于查询天气
-amap:
-    key: b07a3300faadd38f99f1b10b0f9d9a25
+        - sk-7f0QuciXQwHxeQRC1b35535794384c37A581C1088aC41849
+    model: gpt-4
+    history: 10
+    default_prompt: 'You are a helpful assistant, and your assistance will be crucial for the other party in the next steps.'

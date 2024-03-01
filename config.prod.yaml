@@ -1,21 +1,10 @@
 log:
-    file: /var/logs/chatbot/app.log
-    level: INFO
-
-voice_path: /var/apps/chatbot/voices/
-
-database: mysql+pymysql://root:Ir5omjakyarsh_Z0@10.0.4.13/chatbot
+    verbose: false
 
 openai:
-    api_base: http://127.0.0.1/v1/c
-    api_key: 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
-    model: gpt-3.5-turbo
-    default_prompt: 'asdasd'
-    proxy: http://127.0.0.8085
-
-email:
-    smtp_server: smtp.qq.com
-    smtp_port: 465
-    sender_email: pipimeme-ci-stop@qq.com
-    sender_password: tcpeqsyrgxnbdbhd
-
+    api_base: https://one-api.devcxl.cn/v1
+    api_keys:
+        - sk-7f0QuciXQwHxeQRC1b35535794384c37A581C1088aC41849
+    model: gpt-4
+    history: 10
+    default_prompt: 'You are a helpful assistant, and your assistance will be crucial for the other party in the next steps.'

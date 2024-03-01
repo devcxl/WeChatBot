@@ -16,9 +16,8 @@ log = logging.getLogger('main')
 class WeChatGPT:
 
     def __init__(self):
-        itchat.auto_login(picDir='./qr.png', hotReload=True,
-                          statusStorageDir='./tmp.ipkl')
-
+        itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir='cookie.ipkl')
+        self.history = {}
         if config.conf.openai.api_base:
             openai.api_base = config.conf.openai.api_base
 
@@ -32,35 +31,41 @@ class WeChatGPT:
         def add_friend(msg):
             """自动同意好友"""
             # 解析XML文本
-            # print(msg.content)
             root = ET.fromstring(msg.content)
-            # 获取alias、bigheadimgurl和snsbgimgid的值
+
+            realwxid = root.get('fromusername')
             wechat_id = root.get('alias')
             head_img = root.get('bigheadimgurl')
             bg_img = root.get('snsbgimgid')
-            ticket = root.get('ticket')
             nick_name = root.get('fromnickname')
             content = root.get('content')
-            # itchat.accept_friend(msg.user.userName, ticket)
-            user = itchat.search_friends(remarkName='u155')[0]
-            itchat.send_msg(f'{nick_name}({wechat_id})请求添加好友：{content}', user.userName)
-            log.info(f'{nick_name}({wechat_id})请求添加好友：{content}')
-            msg.user.verify()
+
+            ticket = root.get('ticket')
+            itchat.accept_friend(msg.user.userName, ticket)
 
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-            tmp_uid: str = msg.user.RemarkName
-            content: str = msg.text
-            user_id = int(tmp_uid.replace('u', ''))
-            return handler_text(msg_id=msg.MsgId, user_id=user_id, content=content)
+            self.history.setdefault(msg.user.userName, [])
+            history = self.history[msg.user.userName]
+            need_remove_len = len(history) - config.conf.openai.history
+            if need_remove_len > 0:
+                for i in range(need_remove_len):
+                    history.pop(0)
+
+            return handler_text(content=msg.text, history=history)
 
         @itchat.msg_register(VOICE)
         def friend(msg):
             """处理私聊消息"""
+            self.history.setdefault(msg.user.userName, [])
+            history = self.history[msg.user.userName]
+            need_remove_len = len(history) - config.conf.openai.history
+            if need_remove_len > 0:
+                for i in range(need_remove_len):
+                    history.pop(0)
+
             msg.download(msg.fileName)
-            tmp_uid: str = msg.user.RemarkName
-            user_id = int(tmp_uid.replace('u', ''))
             audio_file = open(msg.fileName, "rb")
             client = balancer.get_next_item()
             transcript = client.audio.transcriptions.create(
@@ -68,13 +73,19 @@ class WeChatGPT:
                 file=audio_file
             )
             content = transcript.text
-            return handler_text(msg_id=msg.MsgId, user_id=user_id, content=content)
+            return handler_text(content=content, history=history)
 
-        # @itchat.msg_register(TEXT, isGroupChat=True)
-        # def groups(msg):
-        #     """处理群聊消息"""
-        #     if msg.isAt:
-        #         return self.handler_msg(msg)
+        @itchat.msg_register(TEXT, isGroupChat=True)
+        def groups(msg):
+            """处理群聊消息"""
+            if msg.isAt:
+                self.history.setdefault(msg.user.userName, [])
+                history = self.history[msg.user.userName]
+                need_remove_len = len(history) - config.conf.openai.history
+                if need_remove_len > 0:
+                    for i in range(need_remove_len):
+                        history.pop(0)
+                return handler_text(msg.text, history=history)
 
         itchat.run()
 

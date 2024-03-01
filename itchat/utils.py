@@ -41,9 +41,6 @@ for k in ('UniFriend', 'Sex', 'AppAccountFlag', 'VerifyFlag', 'ChatRoomId', 'Hid
     friendInfoTemplate[k] = 0
 friendInfoTemplate['MemberList'] = []
 
-def clear_screen():
-    os.system('cls' if config.OS == 'Windows' else 'clear')
-
 def emoji_formatter(d, k):
     ''' _emoji_deebugger is for bugs about emoji match caused by wechat backstage
     like :face with tears of joy: will be replaced with :cat face with tears of joy:
@@ -89,9 +86,7 @@ def print_qr(fileDir):
     if config.OS == 'Darwin':
         subprocess.call(['open', fileDir])
     elif config.OS == 'Linux':
-        ITCHAT_UOS_LINUX_OPEN = os.environ.get('ITCHAT_UOS_LINUX_OPEN', False)
-        if ITCHAT_UOS_LINUX_OPEN:
-            subprocess.call(['xdg-open', fileDir])
+        subprocess.call(['xdg-open', fileDir])
     else:
         os.startfile(fileDir)
 

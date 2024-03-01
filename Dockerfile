@@ -1,3 +1,3 @@
 FROM debian:12-slim
-COPY ./dist/ /usr/bin/
-CMD [ "wechatbot", "-f", "config.json" ]
+COPY ./dist/ /opt/
+CMD [ "/opt/wechatbot", "-f", "/opt/config.prod.yaml" ]

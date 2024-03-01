@@ -110,7 +110,7 @@ def produce_msg(core, msgList):
                 'Text': {
                     'status'        : m['Status'],
                     'userName'      : m['RecommendInfo']['UserName'],
-                    'verifyContent' : m['RecommendInfo']['Ticket'],
+                    'verifyContent' : m['Ticket'],
                     'autoUpdate'    : m['RecommendInfo'], }, }
             m['User'].verifyDict = msg['Text']
         elif m['MsgType'] == 42: # name card
