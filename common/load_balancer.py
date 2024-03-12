@@ -3,7 +3,7 @@ from typing import List
 
 from openai import OpenAI
 
-from config import conf
+import config
 
 log = logging.getLogger('LoadBalancer')
 
@@ -23,7 +23,7 @@ class OpenaiLoadBalancer:
         self.current_index = (self.current_index + 1) % len(self.items)
         log.debug(f'current_apikey: {next_item}')
 
-        return OpenAI(api_key=next_item, base_url=conf.openai.api_base)
+        return OpenAI(api_key=next_item, base_url=config.api_url)
 
 
-balancer = OpenaiLoadBalancer(conf.openai.api_keys)
+balancer = OpenaiLoadBalancer(config.api_keys)

@@ -1,14 +1,14 @@
 import logging
+import os
 import xml.etree.ElementTree as ET
 
-import itchat
 import openai
 
-from common.load_balancer import balancer
-from itchat.content import *
-
 import config
+import itchat
+from common.load_balancer import balancer
 from handler.text import handler_text
+from itchat.content import *
 
 log = logging.getLogger('main')
 
@@ -16,15 +16,24 @@ log = logging.getLogger('main')
 class WeChatGPT:
 
     def __init__(self):
-        itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir='cookie.ipkl')
+        itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir=os.path.join(config.data_dirs, 'cookie.bin'))
         self.history = {}
-        if config.conf.openai.api_base:
-            openai.api_base = config.conf.openai.api_base
+        if config.api_url:
+            openai.api_base = config.api_url
 
-        if config.conf.openai.proxy:
-            openai.proxy = config.conf.openai.proxy
+        if config.proxy:
+            openai.proxy = config.proxy
 
         log.info("init successful!")
+
+    def handler_history(self, msg):
+        self.history.setdefault(msg.user.userName, [])
+        history = self.history[msg.user.userName]
+        need_remove_len = len(history) - config.history
+        if need_remove_len > 0:
+            for i in range(need_remove_len):
+                history.pop(0)
+        return history
 
     def run(self):
         @itchat.msg_register(FRIENDS)
@@ -46,46 +55,29 @@ class WeChatGPT:
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-            self.history.setdefault(msg.user.userName, [])
-            history = self.history[msg.user.userName]
-            need_remove_len = len(history) - config.conf.openai.history
-            if need_remove_len > 0:
-                for i in range(need_remove_len):
-                    history.pop(0)
-
-            return handler_text(content=msg.text, history=history)
+            return handler_text(content=msg.text, history=self.handler_history(msg))
 
         @itchat.msg_register(VOICE)
         def friend(msg):
             """处理私聊消息"""
-            self.history.setdefault(msg.user.userName, [])
-            history = self.history[msg.user.userName]
-            need_remove_len = len(history) - config.conf.openai.history
-            if need_remove_len > 0:
-                for i in range(need_remove_len):
-                    history.pop(0)
-
             msg.download(msg.fileName)
             audio_file = open(msg.fileName, "rb")
             client = balancer.get_next_item()
-            transcript = client.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file
-            )
-            content = transcript.text
-            return handler_text(content=content, history=history)
+            try:
+                transcript = client.audio.transcriptions.create(
+                    model="whisper-1",
+                    file=audio_file
+                )
+                content = transcript.text
+                return handler_text(content=content, history=self.handler_history(msg))
+            except openai.InternalServerError as e:
+                return '暂时无法处理语音消息'
 
         @itchat.msg_register(TEXT, isGroupChat=True)
         def groups(msg):
             """处理群聊消息"""
             if msg.isAt:
-                self.history.setdefault(msg.user.userName, [])
-                history = self.history[msg.user.userName]
-                need_remove_len = len(history) - config.conf.openai.history
-                if need_remove_len > 0:
-                    for i in range(need_remove_len):
-                        history.pop(0)
-                return handler_text(msg.text, history=history)
+                return handler_text(msg.text, history=self.handler_history(msg))
 
         itchat.run()
 

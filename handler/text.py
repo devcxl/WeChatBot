@@ -1,6 +1,7 @@
 import json
 import logging
 
+import openai
 from openai import RateLimitError
 
 import config
@@ -12,14 +13,14 @@ log = logging.getLogger('text')
 
 def handler_text(content: str, history: []):
     client = balancer.get_next_item()
-    messages = [{"role": "system", "content": f'{config.conf.openai.default_prompt}'}]
+    messages = [{"role": "system", "content": f'{config.default_prompt}'}]
     for item in history:
         messages.append(item)
     messages.append({"role": "user", "content": content})
     history.append({"role": "user", "content": content})
     try:
         response = client.chat.completions.create(
-            model=config.conf.openai.model,
+            model=config.model,
             messages=messages,
             tools=function.function_declares,
             tool_choice="auto"
@@ -43,7 +44,7 @@ def handler_text(content: str, history: []):
                 )
 
             second_response = client.chat.completions.create(
-                model=config.conf.openai.model,
+                model=config.model,
                 messages=messages,
             )
             resp = str(second_response.choices[0].message.content)
@@ -53,6 +54,7 @@ def handler_text(content: str, history: []):
             resp = str(response.choices[0].message.content)
             history.append({"role": "assistant", "content": resp})
             return resp
-
-    except RateLimitError as e:
+    except RateLimitError:
         return '访问受限，请稍后再试。'
+    except openai.InternalServerError:
+        return '维护中，暂时无法处理消息。请耐心等待稍后再试。'
