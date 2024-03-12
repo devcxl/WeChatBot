@@ -494,9 +494,6 @@ class Core(object):
         """
         raise NotImplementedError
 
-    def request(self, type: str, path: str, params):
-        raise NotImplementedError
-
     def run(self, debug=True, blockThread=True):
         ''' start auto respond
             for option
