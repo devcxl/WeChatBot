@@ -60,8 +60,9 @@ class WeChatGPT:
         @itchat.msg_register(VOICE)
         def friend(msg):
             """处理私聊消息"""
-            msg.download(msg.fileName)
-            audio_file = open(msg.fileName, "rb")
+            filepath = os.path.join(config.data_dirs, 'voices', msg.fileName)
+            msg.download(filepath)
+            audio_file = open(filepath, "rb")
             client = balancer.get_next_item()
             try:
                 transcript = client.audio.transcriptions.create(
