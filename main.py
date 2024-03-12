@@ -23,6 +23,7 @@ class WeChatGPT:
 
         if config.proxy:
             openai.proxy = config.proxy
+        os.makedirs(os.path.join(config.data_dirs, 'voices'), exist_ok=True)
 
         log.info("init successful!")
 
