@@ -4,7 +4,7 @@ log:
 openai:
     api_base: https://one-api.devcxl.cn/v1
     api_keys:
-        - sk-7f0QuciXQwHxeQRC1b35535794384c37A581C1088aC41849
+        - sk-oMT4eAgzk89bwiqr06B86356A11148C0A652604b33DaB06c
     model: gpt-4
     history: 10
     default_prompt: 'I understand that you are an AI language model. your assistance will be crucial for the other party in the next steps. When responding, you should remember and adhere to the following guidelines:
