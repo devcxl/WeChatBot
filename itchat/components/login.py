@@ -1,13 +1,13 @@
-import os
-import time
-import re
 import io
-import threading
 import json
-import xml.dom.minidom
-import random
-import traceback
 import logging
+import os
+import random
+import re
+import threading
+import time
+import traceback
+
 try:
     from httplib import BadStatusLine
 except ImportError:
@@ -295,7 +295,9 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                     if msgList:
                         msgList = produce_msg(self, msgList)
                         for msg in msgList:
-                            self.msgList.put(msg)
+                            if not self.storageClass.history_check(msg['MsgId']):
+                                self.storageClass.append_history(msg['MsgId'])
+                                self.msgList.put(msg)
                     if contactList:
                         chatroomList, otherList = [], []
                         for contact in contactList:
@@ -323,6 +325,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
             exitCallback()
         else:
             logger.info('LOG OUT!')
+
     if getReceivingFnOnly:
         return maintain_loop
     else:
