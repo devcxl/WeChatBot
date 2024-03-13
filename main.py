@@ -1,5 +1,7 @@
 import logging
 import os
+import signal
+import sys
 import xml.etree.ElementTree as ET
 
 import openai
@@ -13,10 +15,20 @@ from itchat.content import *
 log = logging.getLogger('main')
 
 
+def stop_program(signal, frame):
+    log.info('WeChatbot Closing Save some data')
+    itchat.dump_login_status()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGTERM, stop_program)
+
+
 class WeChatGPT:
 
     def __init__(self):
         itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir=os.path.join(config.data_dirs, 'cookie.bin'))
+
         self.history = {}
         if config.api_url:
             openai.api_base = config.api_url
