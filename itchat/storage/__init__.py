@@ -50,7 +50,7 @@ class Storage(object):
     def loads(self, j):
         self.userName = j.get('userName', None)
         self.nickName = j.get('nickName', None)
-        del self.msg_history[:]
+        self.msg_history.clear()
         for i in j.get('msgHistory', []):
             self.msg_history.append(i)
         del self.memberList[:]

@@ -36,7 +36,7 @@ class WeChatGPT:
         if config.proxy:
             openai.proxy = config.proxy
         os.makedirs(os.path.join(config.data_dirs, 'voices'), exist_ok=True)
-
+        log.debug(config.default_prompt)
         log.info("init successful!")
 
     def handler_history(self, msg):
@@ -46,6 +46,7 @@ class WeChatGPT:
         if need_remove_len > 0:
             for i in range(need_remove_len):
                 history.pop(0)
+        log.debug(history)
         return history
 
     def run(self):
