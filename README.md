@@ -11,20 +11,9 @@ WeChatBot是一款基于ItChat-UOS的微信聊天机器人，可以将你的微�
 > - 建议不要给太多人使用，可能会导致账号被封禁。
 > - 无法登陆的情况建议给小号绑上银行卡再试。
 
-## 聊天指令
+## 部署
 
-| 指令     | 功能     |
-|--------|--------|
-| /clear | 清理聊天历史 |
-
-## FunctionCall插件
-
-| 名称      | 环境变量               | 功能             | 对话示例              |
-|---------|--------------------|----------------|-------------------|
-| Weather | PLUGIN_WEATHER_KEY | 获取给定位置未来几天内的天气 | 明天上海天气怎么样，适合穿什么衣服 |
-
-## docker部署
-
+### Docker
 ```shell
 docker run -d --name wechatbot \
 -e TZ=Asia/Shanghai \
@@ -33,7 +22,7 @@ docker run -d --name wechatbot \
 ghcr.io/devcxl/wechatbot:latest
 ```
 
-## docker-compose部署
+### docker-compose
 
 ```yaml
 version: '3.9'
@@ -50,11 +39,6 @@ services:
         restart: unless-stopped
 ```
 
-### 登陆
-
-`docker logs wechatbot --tail 200 -f`
-
-扫描控制台的二维码登陆
 
 ## 环境变量
 
@@ -70,9 +54,21 @@ services:
 | PLUGIN_WEATHER_KEY | None                         | 高德地图的apikey                            |
 
 
+## 聊天指令
+
+| 指令     | 功能     |
+|--------|--------|
+| /clear | 清理聊天历史 |
+
+## FunctionCall插件
+
+| 名称      | 环境变量               | 功能             | 使用示例              |
+|---------|--------------------|----------------|-------------------|
+| Weather | PLUGIN_WEATHER_KEY | 获取给定位置未来几天内的天气 | 明天上海天气怎么样，适合穿什么衣服 |
+
 ## 贡献FunctionCall插件
 
-仿照`weather_function.py`开发即可
+fork本项目，仿照`weather_function.py`创建自己想实现的功能开发即可
 
 ````python
 import logging
@@ -137,3 +133,11 @@ class WeatherFunction(BaseFunction):
 ```python
 functions.register(WeatherFunction)
 ```
+
+
+
+
+## 相关项目
+
+- https://github.com/littlecodersh/ItChat
+- https://github.com/why2lyj/ItChat-UOS
