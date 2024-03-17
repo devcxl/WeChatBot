@@ -3,8 +3,3 @@ pyqrcode
 pypng
 openai
 pyinstaller
-beautifulsoup4
-pydantic
-PyYAML
-sqlalchemy
-pymysql
