@@ -8,12 +8,13 @@ WeChatBot是一款基于ItChat-UOS的微信聊天机器人，可以将你的微�
 
 > 注意！！！
 > - 使用该项目微信账号有被封禁的风险，请使用小号登陆。
-> - 建议不要给太多人使用，可能会导致账号被封禁。
-> - 无法登陆的情况建议给小号绑上银行卡再试。
+> - 建议不要给太多人高频率使用，可能会导致账号被封禁。
+
 
 ## 部署
 
 ### Docker
+
 ```shell
 docker run -d --name wechatbot \
 -e TZ=Asia/Shanghai \
@@ -39,20 +40,29 @@ services:
         restart: unless-stopped
 ```
 
+### 登陆微信
+
+查看`wechatbot`的日志
+
+`docker logs wechatbot --tail 200 -f`
+
+扫码登陆即可。
+
+> 注意！！！
+> - 无法登陆的情况建议给小号绑上银行卡再试。
 
 ## 环境变量
 
-| KEY                | DEFAULT                      | detail                                 |
-|--------------------|------------------------------|----------------------------------------|
-| OPENAI_API_URL     | https://api.openai.com/v1    | OPENAI的接口                              |
-| OPENAI_API_KEYS    | None                         | OPENAI的ApiKey,使用`,`分割                  |
-| MODEL              | gpt-3.5-turbo                | 对话使用的模型(建议使用带Function Call功能的模型)       |
-| DEFAULT_PROMPT     | You are a helpful assistant. | 默认提示词                                  |
-| HISTORY            | 15                           | 历史消息数                                  |
-| DATA_DIR           | /data                        | 数据文件夹                                  |
-| OPENAI_PROXY       | None                         | 请求OPENAI的代理(eg: http://127.0.0.1:8889) |
-| PLUGIN_WEATHER_KEY | None                         | 高德地图的apikey                            |
-
+| KEY                | REQUIRE | DEFAULT                      | DETAIL                                 |
+|--------------------|---------|------------------------------|----------------------------------------|
+| OPENAI_API_URL     | No      | https://api.openai.com/v1    | OpenAI的接口                              |
+| OPENAI_API_KEYS    | Yes     | None                         | OpenAI的APIKey,使用`,`分割                  |
+| MODEL              | No      | gpt-3.5-turbo                | 对话使用的模型(建议使用带Function Call功能的模型)       |
+| DEFAULT_PROMPT     | No      | You are a helpful assistant. | 默认提示词                                  |
+| HISTORY            | No      | 15                           | 历史消息数                                  |
+| DATA_DIR           | No      | /data                        | 数据文件夹                                  |
+| OPENAI_PROXY       | Yes     | None                         | 请求OpenAI的代理(eg: http://127.0.0.1:8889) |
+| PLUGIN_WEATHER_KEY | No      | None                         | 高德地图的APIKey                            |
 
 ## 聊天指令
 
@@ -133,9 +143,6 @@ class WeatherFunction(BaseFunction):
 ```python
 functions.register(WeatherFunction)
 ```
-
-
-
 
 ## 相关项目
 
