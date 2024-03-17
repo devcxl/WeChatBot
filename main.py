@@ -94,6 +94,14 @@ class WeChatGPT:
             if msg.isAt:
                 return handler_text(msg.text, history=self.handler_history(msg))
 
+        @itchat.command(name='/clear', detail='清理聊天上下文', friend=True, group=True)
+        def command_clean(message, user):
+            try:
+                self.history[user.userName].clear()
+                return '清理完毕！'
+            except KeyError:
+                return '不存在消息记录，无需清理'
+
         itchat.run()
 
 
