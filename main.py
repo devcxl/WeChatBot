@@ -30,6 +30,7 @@ class WeChatGPT:
         itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir=os.path.join(config.data_dirs, 'cookie.bin'))
 
         self.history = {}
+        self.prompts = {}
         if config.api_url:
             openai.api_base = config.api_url
 
@@ -69,11 +70,19 @@ class WeChatGPT:
         @itchat.msg_register(TEXT)
         def friend(msg):
             """处理私聊消息"""
-            return handler_text(content=msg.text, history=self.handler_history(msg))
+            try:
+                current_chat_prompt = self.prompts[msg.user.userName]
+            except KeyError:
+                current_chat_prompt = config.default_prompt
+            return handler_text(content=msg.text, history=self.handler_history(msg), prompt=current_chat_prompt)
 
         @itchat.msg_register(VOICE)
         def friend(msg):
             """处理私聊消息"""
+            try:
+                current_chat_prompt = self.prompts[msg.user.userName]
+            except KeyError:
+                current_chat_prompt = config.default_prompt
             filepath = os.path.join(config.data_dirs, 'voices', msg.fileName)
             msg.download(filepath)
             audio_file = open(filepath, "rb")
@@ -84,7 +93,7 @@ class WeChatGPT:
                     file=audio_file
                 )
                 content = transcript.text
-                return handler_text(content=content, history=self.handler_history(msg))
+                return handler_text(content=content, history=self.handler_history(msg), prompt=current_chat_prompt)
             except openai.InternalServerError as e:
                 return '暂时无法处理语音消息'
 
@@ -101,6 +110,11 @@ class WeChatGPT:
                 return '清理完毕！'
             except KeyError:
                 return '不存在消息记录，无需清理'
+
+        @itchat.command(name='/prompt', detail='设置当前私聊的提示词', friend=True, group=False)
+        def command_prompt(message, user):
+            self.prompts[user.userName] = message
+            return '设置成功！开始对话吧！'
 
         itchat.run()
 
