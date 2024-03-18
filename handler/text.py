@@ -55,6 +55,6 @@ def handler_text(content: str, history: []):
             history.append({"role": "assistant", "content": resp})
             return resp
     except RateLimitError:
-        return '访问受限，请稍后再试。'
-    except openai.InternalServerError:
-        return '维护中，暂时无法处理消息。请耐心等待稍后再试。'
+        return '请求过于频繁，请稍后再试。'
+    except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
+        return 'OpenAI接口维护中，暂时无法处理消息。请耐心等待稍后再试。'
