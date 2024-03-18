@@ -20,7 +20,7 @@ docker run -d --name wechatbot \
 -e TZ=Asia/Shanghai \
 -e OPENAI_API_URL=https://your.proxy.domain.com/v1 \
 -e OPENAI_API_KEYS=sk-xxxxxxxxxxxxxxxxxxxxxxxx,sk-xxxxxxxxxxxxxxxxxxxxxxxx \
-ghcr.io/devcxl/wechatbot:latest
+devcxl/wechatbot:latest
 ```
 
 ### docker-compose
@@ -29,7 +29,7 @@ ghcr.io/devcxl/wechatbot:latest
 version: '3.9'
 services:
     wechatbot:
-        image: ghcr.io/devcxl/wechatbot:latest
+        image: devcxl/wechatbot:latest
         container_name: wechatbot
         environment:
             - TZ=Asia/Shanghai

@@ -23,7 +23,7 @@ jobs:
                 run: |
                     pyinstaller --clean wechatbot.spec
 
-            -   name: Log in to the Container registry
+            -   name: Login to a private Container registry
                 uses: docker/login-action@v3
                 with:
                     registry: ${{ secrets.DOCKER_REGISTRY }}
