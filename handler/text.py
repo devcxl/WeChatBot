@@ -11,9 +11,9 @@ from common.load_balancer import balancer
 log = logging.getLogger('text')
 
 
-def handler_text(content: str, history: []):
+def handler_text(content: str, history: [], prompt: str = config.default_prompt):
     client = balancer.get_next_item()
-    messages = [{"role": "system", "content": f'{config.default_prompt}'}]
+    messages = [{"role": "system", "content": f'{prompt}'}]
     for item in history:
         messages.append(item)
     messages.append({"role": "user", "content": content})
