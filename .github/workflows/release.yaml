@@ -29,12 +29,18 @@ jobs:
                 run: |
                     pyinstaller --clean wechatbot.spec
 
-            -   name: Login to the Container registry
+            -   name: Login to the Github Container registry
                 uses: docker/login-action@v3
                 with:
                     registry: ghcr.io
                     username: ${{ github.actor }}
                     password: ${{ secrets.GITHUB_TOKEN }}
+
+            -   name: Login to the Docker official Container registry
+                uses: docker/login-action@v3
+                with:
+                    username: ${{ github.actor }}
+                    password: ${{ secrets.DOCKER_OFFICIAL_PASSWORD }}
 
             -   name: Login to a private Container registry
                 uses: docker/login-action@v3
@@ -48,6 +54,7 @@ jobs:
                 uses: docker/metadata-action@v5
                 with:
                     images: |
+                        docker.io/${{ github.repository }}
                         ${{ env.REGISTRY }}/${{ github.repository }}
                         ${{ secrets.DOCKER_REGISTRY }}/${{ github.repository }}
                     tags: |
@@ -69,7 +76,5 @@ jobs:
                     draft: true
                     tag_name: v${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
                     generate_release_notes: true
-
-                    append_body: true
                 env:
                     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
