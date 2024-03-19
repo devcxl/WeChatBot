@@ -65,7 +65,7 @@ class EmailFunction(BaseFunction):
         try:
             self.server.sendmail(self.email, to, self.build_message(to, subject, content))
             log.info(f"send to {to} successful")
-            return "邮件发送成功"
+            return f"邮件发送成功。标题：{subject}, 内容：{content}"
         except smtplib.SMTPException as e:
             log.error("email send failed:", str(e))
             return "邮件发送失败"
