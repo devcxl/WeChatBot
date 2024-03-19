@@ -120,7 +120,7 @@ class WeChatGPT:
 
         @itchat.command(name='/imagine', detail='使用DALL-E-3生成图像', friend=True, group=False)
         def command_clean(message, user):
-            bytes_to_encode = message.encode('utf-8')
+            bytes_to_encode = ",".join(message).encode('utf-8')
             base64_bytes = base64.b64encode(bytes_to_encode)
             encoded_text = base64_bytes.decode('utf-8')
             filename = f'{encoded_text}.jpg'
