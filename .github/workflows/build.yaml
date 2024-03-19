@@ -1,7 +1,7 @@
 on:
     push:
         branches:
-            - dev
+            - 'feature/*'
 
 jobs:
     build-docker-image:
