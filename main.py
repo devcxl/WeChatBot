@@ -121,7 +121,8 @@ class WeChatGPT:
 
         @itchat.command(name='/imagine', detail='使用DALL-E-3生成图像', friend=True, group=False)
         def command_clean(message, user):
-            bytes_to_encode = ",".join(message).encode('utf-8')
+            prompt = ",".join(message)
+            bytes_to_encode = prompt.encode('utf-8')
             base64_bytes = base64.b64encode(bytes_to_encode)
             encoded_text = base64_bytes.decode('utf-8')
             filename = f'{encoded_text}.jpg'
@@ -133,7 +134,7 @@ class WeChatGPT:
             try:
                 response = client.images.generate(
                     model="dall-e-3",
-                    prompt=message,
+                    prompt=prompt,
                     size="1024x1024",
                     quality="standard",
                     n=1,
