@@ -4,7 +4,8 @@ WeChatBot是一款基于ItChat-UOS的微信聊天机器人，可以将你的微�
 
 * 支持OpenAI的多个Api-Key轮询使用
 * 支持OpenAI的Function call
-* 支持Whisper语音识别
+* 支持OpenAI的Whisper语音识别
+* 支持OpenAI的DALL-E-3画图
 
 > 注意！！！
 > - 使用该项目微信账号有被封禁的风险，请使用小号登陆。
