@@ -148,7 +148,10 @@ class WeChatGPT:
                     return f'@img@{filepath}'
                 else:
                     return '获取图像失败，请稍后重新再试'
-            except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
+            except (openai.InternalServerError, openai.BadRequestError,
+                    openai.NotFoundError, openai.UnprocessableEntityError,
+                    openai.BadRequestError
+                    ):
                 return 'OpenAI接口维护中，暂时无法处理画图命令。请耐心等待稍后再试'
 
         itchat.run()
