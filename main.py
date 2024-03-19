@@ -1,10 +1,10 @@
+import base64
 import logging
 import os
 import signal
 import sys
-import time
 import xml.etree.ElementTree as ET
-import base64
+
 import openai
 import requests
 
@@ -138,7 +138,10 @@ class WeChatGPT:
                     n=1,
                 )
                 image_url = response.data[0].url
-                response = requests.get(image_url)
+                proxies = None
+                if config.proxy:
+                    proxies = {'http': config.proxy, 'https': config.proxy}
+                response = requests.get(image_url, proxies=proxies)
                 if response.status_code == 200:
                     with open(filepath, 'wb') as f:
                         f.write(response.content)
