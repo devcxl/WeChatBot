@@ -129,32 +129,32 @@ class WeChatGPT:
             filepath = os.path.join(config.data_dirs, 'dall-e-3', filename)
             if os.path.exists(filepath):
                 return f'@img@{filepath}'
-
-            client = balancer.get_next_item()
-            try:
-                response = client.images.generate(
-                    model="dall-e-3",
-                    prompt=prompt,
-                    size="1024x1024",
-                    quality="standard",
-                    n=1,
-                )
-                image_url = response.data[0].url
-                proxies = None
-                if config.proxy:
-                    proxies = {'http': config.proxy, 'https': config.proxy}
-                response = requests.get(image_url, proxies=proxies)
-                if response.status_code == 200:
-                    with open(filepath, 'wb') as f:
-                        f.write(response.content)
-                    return f'@img@{filepath}'
-                else:
-                    return '获取图像失败，请稍后重新再试'
-            except (openai.InternalServerError, openai.BadRequestError,
-                    openai.NotFoundError, openai.UnprocessableEntityError,
-                    openai.BadRequestError
-                    ):
-                return 'OpenAI接口维护中，暂时无法处理画图命令。请耐心等待稍后再试'
+            else:
+                client = balancer.get_next_item()
+                try:
+                    response = client.images.generate(
+                        model="dall-e-3",
+                        prompt=prompt,
+                        size="1024x1024",
+                        quality="standard",
+                        n=1,
+                    )
+                    image_url = response.data[0].url
+                    proxies = None
+                    if config.proxy:
+                        proxies = {'http': config.proxy, 'https': config.proxy}
+                    response = requests.get(image_url, proxies=proxies)
+                    if response.status_code == 200:
+                        with open(filepath, 'wb') as f:
+                            f.write(response.content)
+                            return f'@img@{filepath}'
+                    else:
+                        return '获取图像失败，请稍后重新再试'
+                except (openai.InternalServerError, openai.BadRequestError,
+                        openai.NotFoundError, openai.UnprocessableEntityError,
+                        openai.BadRequestError
+                        ):
+                    return 'OpenAI接口维护中，暂时无法处理画图命令。请耐心等待稍后再试'
 
         itchat.run()
 
