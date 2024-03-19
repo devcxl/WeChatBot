@@ -52,16 +52,20 @@ services:
 
 ## 环境变量
 
-| KEY                | REQUIRE | DEFAULT                      | DETAIL                                 |
-|--------------------|---------|------------------------------|----------------------------------------|
-| OPENAI_API_URL     | No      | https://api.openai.com/v1    | OpenAI的接口                              |
-| OPENAI_API_KEYS    | Yes     | None                         | OpenAI的APIKey,使用`,`分割                  |
-| MODEL              | No      | gpt-3.5-turbo                | 对话使用的模型(建议使用带Function Call功能的模型)       |
-| DEFAULT_PROMPT     | No      | You are a helpful assistant. | 默认提示词                                  |
-| HISTORY            | No      | 15                           | 历史消息数                                  |
-| DATA_DIR           | No      | /data                        | 数据文件夹                                  |
-| OPENAI_PROXY       | Yes     | None                         | 请求OpenAI的代理(eg: http://127.0.0.1:8889) |
-| PLUGIN_WEATHER_KEY | No      | None                         | 高德地图的APIKey                            |
+| KEY                      | REQUIRE | DEFAULT                      | DETAIL                                 |
+|--------------------------|---------|------------------------------|----------------------------------------|
+| OPENAI_API_URL           | No      | https://api.openai.com/v1    | OpenAI的接口                              |
+| OPENAI_API_KEYS          | Yes     | None                         | OpenAI的APIKey,使用`,`分割                  |
+| MODEL                    | No      | gpt-3.5-turbo                | 对话使用的模型(建议使用带Function Call功能的模型)       |
+| DEFAULT_PROMPT           | No      | You are a helpful assistant. | 默认提示词                                  |
+| HISTORY                  | No      | 15                           | 历史消息数                                  |
+| DATA_DIR                 | No      | /data                        | 数据文件夹                                  |
+| OPENAI_PROXY             | Yes     | None                         | 请求OpenAI的代理(eg: http://127.0.0.1:8889) |
+| PLUGIN_WEATHER_KEY       | No      | None                         | 高德地图的APIKey                            |
+| PLUGIN_EMAIL_SMTP_SERVER | No      | None                         | smtp服务器地址                              |
+| PLUGIN_EMAIL_SMTP_PORT   | No      | None                         | smtp服务器端口                              |
+| PLUGIN_EMAIL_ADDRESS     | No      | None                         | 邮箱发信地址                                 |
+| PLUGIN_EMAIL_PASSWORD    | No      | None                         | 邮箱smtp密码                               |
 
 ## 聊天指令
 
@@ -72,72 +76,15 @@ services:
 
 ## FunctionCall插件
 
-| 名称       | 环境变量               | 功能             | 使用示例              |
-|----------|--------------------|----------------|-------------------|
-| Weather  | PLUGIN_WEATHER_KEY | 获取给定位置未来几天内的天气 | 明天上海天气怎么样，适合穿什么衣服 |
-| DateTime | None               | 获取当前时间         | 现在距离明天晚上八点还有多长时间  |
+| 名称                  | 需要配置的环境变量                                                                                                 | 功能             | 使用示例                                      |
+|---------------------|-----------------------------------------------------------------------------------------------------------|----------------|-------------------------------------------|
+| get_current_weather | PLUGIN_WEATHER_KEY                                                                                        | 获取给定位置未来几天内的天气 | 明天上海天气怎么样，适合穿什么衣服                         |
+| get_current_time    | None                                                                                                      | 获取当前时间         | 现在距离明天晚上八点还有多长时间                          |
+| send_email          | PLUGIN_EMAIL_SMTP_SERVER,<br/>PLUGIN_EMAIL_SMTP_PORT,<br/>PLUGIN_EMAIL_ADDRESS,<br/>PLUGIN_EMAIL_PASSWORD | 向指定的邮箱发送邮件         | 给example@qq.com发封正式的商务邮件说我病了，明天的会议安排到下周一。 |
 
 ## 贡献FunctionCall插件
 
-fork本项目，仿照`weather_function.py`创建自己想实现的功能开发即可
-
-````python
-import logging
-import os
-
-import requests
-
-from function.base import BaseFunction
-from function.factory import FunctionRegisterError
-
-log = logging.getLogger('plugin weather')
-
-
-class WeatherFunction(BaseFunction):
-
-    def __init__(self):
-        self.key = os.getenv('PLUGIN_WEATHER_KEY', None)
-        if self.key is None:
-            raise FunctionRegisterError('Not set PLUGIN_WEATHER_KEY')
-        super().__init__()
-
-    def declare(self) -> dict:
-        return {
-            "type": "function",
-            "function": {
-                "name": "get_current_weather",
-                "description": "获取给定位置的天气预报",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "location": {
-                            "type": "string",
-                            "description": "城市或区县，例如北京市",
-                        },
-                        "unit": {"type": "string", "enum": ["摄氏", "华氏"]},
-                    },
-                    "required": ["location"],
-                },
-            }
-        }
-
-    def execute(self, function_args) -> str:
-        """Get the current weather in a given location"""
-        location = function_args.get("location")
-
-        city_code_url = f'https://restapi.amap.com/v3/geocode/geo?key={self.key}&address={location}'
-        city_code_resp = requests.get(city_code_url)
-        if city_code_resp.status_code == 200:
-            city_data = city_code_resp.json()
-            city_code = city_data['geocodes'][0]['adcode']
-            weather_info_url = f'https://restapi.amap.com/v3/weather/weatherInfo?key={self.key}&city={city_code}&extensions=all'
-            weather_resp = requests.get(weather_info_url)
-            if weather_resp.status_code == 200:
-                return weather_resp.text
-
-        return '获取天气信息失败'
-
-````
+fork本项目，仿照在`function`包下`weather_function.py`创建自己想实现的功能开发即可
 
 然后在`function`包下的`__init__.py`中仿照`WeatherFunction`进行注册
 
