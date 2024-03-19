@@ -2,8 +2,9 @@ import logging
 import os
 import signal
 import sys
+import time
 import xml.etree.ElementTree as ET
-
+import base64
 import openai
 import requests
 
@@ -119,6 +120,14 @@ class WeChatGPT:
 
         @itchat.command(name='/imagine', detail='使用DALL-E-3生成图像', friend=True, group=False)
         def command_clean(message, user):
+            bytes_to_encode = message.encode('utf-8')
+            base64_bytes = base64.b64encode(bytes_to_encode)
+            encoded_text = base64_bytes.decode('utf-8')
+            filename = f'{encoded_text}.jpg'
+            filepath = os.path.join(config.data_dirs, 'dall-e-3', filename)
+            if os.path.exists(filepath):
+                return f'@img@{filepath}'
+
             client = balancer.get_next_item()
             try:
                 response = client.images.generate(
@@ -131,8 +140,9 @@ class WeChatGPT:
                 image_url = response.data[0].url
                 response = requests.get(image_url)
                 if response.status_code == 200:
-                    with open(os.path.join(config.data_dirs, 'dall-e-3', ''), 'wb') as f:
+                    with open(filepath, 'wb') as f:
                         f.write(response.content)
+                    return f'@img@{filepath}'
                 else:
                     return '获取图像失败，请稍后重新再试'
             except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
