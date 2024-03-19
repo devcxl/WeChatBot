@@ -13,17 +13,18 @@ log = logging.getLogger('plugin email')
 class EmailFunction(BaseFunction):
 
     def __init__(self):
-        self.smtp_server = os.getenv('PLUGIN_EMAIL_SMTP_SERVER', None)
-        self.smtp_port: int = os.getenv('PLUGIN_EMAIL_SMTP_PORT', None)
-        self.sender_email = os.getenv('PLUGIN_EMAIL_ADDRESS', None)
-        self.sender_password = os.getenv('PLUGIN_EMAIL_PASSWORD', None)
+        self.server = os.getenv('PLUGIN_EMAIL_SMTP_SERVER', None)
+        self.port: int = os.getenv('PLUGIN_EMAIL_SMTP_PORT', None)
+        self.email = os.getenv('PLUGIN_EMAIL_ADDRESS', None)
+        self.password = os.getenv('PLUGIN_EMAIL_PASSWORD', None)
         if any(v is None or v == '' for v in
-               [self.smtp_server, self.smtp_port, self.sender_email, self.sender_password]):
+               [self.server, self.port, self.email, self.password]):
             raise FunctionRegisterError("One or more values are empty")
 
+        log.debug(f'server:{self.server},port:{self.port},email:{self.email},password:{self.password}')
         try:
-            self.server = smtplib.SMTP_SSL(self.smtp_server, self.smtp_port)
-            self.server.login(self.sender_email, self.sender_password)
+            self.server = smtplib.SMTP_SSL(self.server, self.port)
+            self.server.login(self.email, self.password)
             log.info("email login successful")
         except RuntimeError:
             raise FunctionRegisterError('Email login failed!')
@@ -60,18 +61,19 @@ class EmailFunction(BaseFunction):
         to = function_args.get("to")
         subject = function_args.get("subject")
         content = function_args.get("content")
+        log.debug(f'function_args->to:{to},subject: {subject}, content:{content}')
         try:
-            self.server.sendmail(self.sender_email, to, subject, content.encode('utf-8'))
+            self.server.sendmail(self.email, to, subject, content.encode('utf-8'))
             log.info(f"send to {to} successful")
             return "邮件发送成功"
         except smtplib.SMTPException as e:
             log.error("email send failed:", str(e))
             return "邮件发送失败"
 
-    def build_message(self, to, title, context, format='plain') -> str:
+    def build_message(self, to, subject, context, format='plain') -> str:
         message = MIMEMultipart()
-        message["From"] = self.sender_email
+        message["From"] = self.email
         message["To"] = to
-        message["Subject"] = title
+        message["Subject"] = subject
         message.attach(MIMEText(context, format))
         return message.as_string()
