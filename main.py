@@ -5,6 +5,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 import openai
+import requests
 
 import config
 import itchat
@@ -115,6 +116,27 @@ class WeChatGPT:
         def command_prompt(message, user):
             self.prompts[user.userName] = message
             return '设置成功！开始对话吧！'
+
+        @itchat.command(name='/imagine', detail='使用DALL-E-3生成图像', friend=True, group=False)
+        def command_clean(message, user):
+            client = balancer.get_next_item()
+            try:
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=message,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1,
+                )
+                image_url = response.data[0].url
+                response = requests.get(image_url)
+                if response.status_code == 200:
+                    with open(os.path.join(config.data_dirs, 'dall-e-3', ''), 'wb') as f:
+                        f.write(response.content)
+                else:
+                    return '获取图像失败，请稍后重新再试'
+            except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
+                return 'OpenAI接口维护中，暂时无法处理画图命令。请耐心等待稍后再试'
 
         itchat.run()
 
