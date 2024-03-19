@@ -28,12 +28,12 @@ def handler_text(content: str, history: [], prompt: str = config.default_prompt)
         response_message = response.choices[0].message
         tool_calls = response_message.tool_calls
         if tool_calls:
+            messages.append(response_message)
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
                 function_to_call = function.available_functions[function_name]
                 function_args = json.loads(tool_call.function.arguments)
                 function_response = function_to_call(function_args)
-                messages.append(response_message)
                 messages.append(
                     {
                         "tool_call_id": tool_call.id,
