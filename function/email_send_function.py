@@ -61,7 +61,7 @@ class EmailFunction(BaseFunction):
         subject = function_args.get("subject")
         content = function_args.get("content")
         try:
-            self.server.sendmail(self.sender_email, to, subject, content)
+            self.server.sendmail(self.sender_email, to, subject, content.encode('utf-8'))
             log.info(f"send to {to} successful")
             return "邮件发送成功"
         except smtplib.SMTPException as e:
