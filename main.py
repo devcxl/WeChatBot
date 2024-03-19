@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import signal
@@ -5,6 +6,7 @@ import sys
 import xml.etree.ElementTree as ET
 
 import openai
+import requests
 
 import config
 import itchat
@@ -37,6 +39,7 @@ class WeChatGPT:
         if config.proxy:
             openai.proxy = config.proxy
         os.makedirs(os.path.join(config.data_dirs, 'voices'), exist_ok=True)
+        os.makedirs(os.path.join(config.data_dirs, 'dall-e-3'), exist_ok=True)
         log.debug(config.default_prompt)
         log.info("init successful!")
 
@@ -115,6 +118,43 @@ class WeChatGPT:
         def command_prompt(message, user):
             self.prompts[user.userName] = message
             return '设置成功！开始对话吧！'
+
+        @itchat.command(name='/imagine', detail='使用DALL-E-3生成图像', friend=True, group=False)
+        def command_clean(message, user):
+            prompt = ",".join(message)
+            bytes_to_encode = prompt.encode('utf-8')
+            base64_bytes = base64.b64encode(bytes_to_encode)
+            encoded_text = base64_bytes.decode('utf-8')
+            filename = f'{encoded_text}.jpg'
+            filepath = os.path.join(config.data_dirs, 'dall-e-3', filename)
+            if os.path.exists(filepath):
+                return f'@img@{filepath}'
+
+            client = balancer.get_next_item()
+            try:
+                response = client.images.generate(
+                    model="dall-e-3",
+                    prompt=prompt,
+                    size="1024x1024",
+                    quality="standard",
+                    n=1,
+                )
+                image_url = response.data[0].url
+                proxies = None
+                if config.proxy:
+                    proxies = {'http': config.proxy, 'https': config.proxy}
+                response = requests.get(image_url, proxies=proxies)
+                if response.status_code == 200:
+                    with open(filepath, 'wb') as f:
+                        f.write(response.content)
+                    return f'@img@{filepath}'
+                else:
+                    return '获取图像失败，请稍后重新再试'
+            except (openai.InternalServerError, openai.BadRequestError,
+                    openai.NotFoundError, openai.UnprocessableEntityError,
+                    openai.BadRequestError
+                    ):
+                return 'OpenAI接口维护中，暂时无法处理画图命令。请耐心等待稍后再试'
 
         itchat.run()
 
