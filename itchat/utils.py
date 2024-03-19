@@ -82,27 +82,6 @@ def check_file(fileDir):
     except:
         return False
 
-def print_qr(fileDir):
-    if config.OS == 'Darwin':
-        subprocess.call(['open', fileDir])
-    elif config.OS == 'Linux':
-        subprocess.call(['xdg-open', fileDir])
-    else:
-        os.startfile(fileDir)
-
-def print_cmd_qr(qrText, white=BLOCK, black='  ', enableCmdQR=True):
-    blockCount = int(enableCmdQR)
-    if abs(blockCount) == 0:
-        blockCount = 1
-    white *= abs(blockCount)
-    if blockCount < 0:
-        white, black = black, white
-    sys.stdout.write(' '*50 + '\r')
-    sys.stdout.flush()
-    qr = qrText.replace('0', white).replace('1', black)
-    sys.stdout.write(qr)
-    sys.stdout.flush()
-
 def struct_friend_info(knownInfo):
     member = copy.deepcopy(friendInfoTemplate)
     for k, v in copy.deepcopy(knownInfo).items(): member[k] = v

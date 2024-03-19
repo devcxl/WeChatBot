@@ -1,4 +1,7 @@
-import logging, traceback, sys, threading
+import logging
+import sys
+import threading
+import traceback
 from functools import wraps
 
 try:
@@ -20,24 +23,19 @@ def load_register(core):
     core.run = run
 
 
-def auto_login(self, hotReload=False, statusStorageDir='itchat.pkl',
-               enableCmdQR=False, picDir=None, qrCallback=None,
-               loginCallback=None, exitCallback=None):
+def auto_login(self, hotReload=False, statusStorageDir='itchat.pkl', loginCallback=None, exitCallback=None):
     if not test_connect():
         logger.info("You can't get access to internet or wechat domain, so exit.")
         sys.exit()
     self.useHotReload = hotReload
     self.hotReloadDir = statusStorageDir
     if hotReload:
-        if self.load_login_status(statusStorageDir,
-                                  loginCallback=loginCallback, exitCallback=exitCallback):
+        if self.load_login_status(statusStorageDir, loginCallback=loginCallback, exitCallback=exitCallback):
             return
-        self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback,
-                   loginCallback=loginCallback, exitCallback=exitCallback)
+        self.login(loginCallback=loginCallback, exitCallback=exitCallback)
         self.dump_login_status(statusStorageDir)
     else:
-        self.login(enableCmdQR=enableCmdQR, picDir=picDir, qrCallback=qrCallback,
-                   loginCallback=loginCallback, exitCallback=exitCallback)
+        self.login(loginCallback=loginCallback, exitCallback=exitCallback)
 
 
 def configured_reply(self):

@@ -22,7 +22,6 @@ instance = load_sync_itchat()
 # components.login
 login                       = instance.login
 get_QRuuid                  = instance.get_QRuuid
-get_QR                      = instance.get_QR
 check_login                 = instance.check_login
 web_init                    = instance.web_init
 show_mobile_login           = instance.show_mobile_login

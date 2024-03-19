@@ -14,7 +14,6 @@ except ImportError:
     from http.client import BadStatusLine
 
 import requests
-from pyqrcode import QRCode
 
 from .. import config, utils
 from ..returnvalues import ReturnValue
@@ -22,13 +21,12 @@ from ..storage.templates import wrap_user_dict
 from .contact import update_local_chatrooms, update_local_friends
 from .messages import produce_msg
 
-logger = logging.getLogger('itchat')
+log = logging.getLogger('itchat')
 
 
 def load_login(core):
     core.login = login
     core.get_QRuuid = get_QRuuid
-    core.get_QR = get_QR
     core.check_login = check_login
     core.web_init = web_init
     core.show_mobile_login = show_mobile_login
@@ -37,35 +35,27 @@ def load_login(core):
     core.logout = logout
 
 
-def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
-          loginCallback=None, exitCallback=None):
+def login(self, loginCallback=None, exitCallback=None):
     if self.alive or self.isLogging:
-        logger.warning('itchat has already logged in.')
+        log.warning('itchat has already logged in.')
         return
     self.isLogging = True
     while self.isLogging:
         uuid = push_login(self)
         if uuid:
-            qrStorage = io.BytesIO()
+            log.info(f"https://qrcode-devcxl.pages.dev/?url=https://login.weixin.qq.com/l/{uuid}")
         else:
-            logger.info('Getting uuid of QR code.')
-            while not self.get_QRuuid():
-                time.sleep(1)
-            logger.info('Downloading QR code.')
-            qrStorage = self.get_QR(enableCmdQR=enableCmdQR,
-                                    picDir=picDir, qrCallback=qrCallback)
-            logger.info('Please scan the QR code to log in.')
+            self.get_QRuuid()
+            log.info(f"https://qrcode-devcxl.pages.dev/?url=https://login.weixin.qq.com/l/{self.uuid}")
+            log.info('Please scan the QR code to log in.')
         isLoggedIn = False
         while not isLoggedIn:
             status = self.check_login()
-            if hasattr(qrCallback, '__call__'):
-                qrCallback(uuid=self.uuid, status=status,
-                           qrcode=qrStorage.getvalue())
             if status == '200':
                 isLoggedIn = True
             elif status == '201':
                 if isLoggedIn is not None:
-                    logger.info('Please press confirm on your phone.')
+                    log.info('Please press confirm on your phone.')
                     isLoggedIn = None
                 time.sleep(0.5)
             elif status != '408':
@@ -73,19 +63,17 @@ def login(self, enableCmdQR=False, picDir=None, qrCallback=None,
         if isLoggedIn:
             break
         elif self.isLogging:
-            logger.info('Log in time out, reloading QR code.')
+            log.info('Log in time out, reloading QR code.')
     else:
         return  # log in process is stopped by user
-    logger.info('Loading the contact, this may take a little while.')
+    log.info('Loading the contact, this may take a little while.')
     self.web_init()
     self.show_mobile_login()
     self.get_contact(True)
     if hasattr(loginCallback, '__call__'):
         r = loginCallback()
     else:
-        if os.path.exists(picDir or config.DEFAULT_QR):
-            os.remove(picDir or config.DEFAULT_QR)
-        logger.info('Login successfully as %s' % self.storageClass.nickName)
+        log.info('Login successfully as %s' % self.storageClass.nickName)
     self.start_receiving(exitCallback)
     self.isLogging = False
 
@@ -117,24 +105,6 @@ def get_QRuuid(self):
     if data and data.group(1) == '200':
         self.uuid = data.group(2)
         return self.uuid
-
-
-def get_QR(self, uuid=None, enableCmdQR=False, picDir=None, qrCallback=None):
-    uuid = uuid or self.uuid
-    picDir = picDir or config.DEFAULT_QR
-    qrStorage = io.BytesIO()
-    qrCode = QRCode('https://login.weixin.qq.com/l/' + uuid)
-    qrCode.png(qrStorage, scale=10)
-    if hasattr(qrCallback, '__call__'):
-        qrCallback(uuid=uuid, status='0', qrcode=qrStorage.getvalue())
-    else:
-        with open(picDir, 'wb') as f:
-            f.write(qrStorage.getvalue())
-        if enableCmdQR:
-            utils.print_cmd_qr(qrCode.text(1), enableCmdQR=enableCmdQR)
-        else:
-            utils.print_qr(picDir)
-    return qrStorage
 
 
 def check_login(self, uuid=None):
@@ -214,7 +184,7 @@ def process_login_info(core, loginContent):
     #     elif node.nodeName == 'pass_ticket':
     #         core.loginInfo['pass_ticket'] = core.loginInfo['BaseRequest']['DeviceID'] = node.childNodes[0].data
     if not all([key in core.loginInfo for key in ('skey', 'wxsid', 'wxuin', 'pass_ticket')]):
-        logger.error(
+        log.error(
             'Your wechat account may be LIMITED to log in WEB wechat, error info:\n%s' % r.text)
         core.isLogging = False
         return False
@@ -315,7 +285,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
                 pass
             except:
                 retryCount += 1
-                logger.error(traceback.format_exc())
+                log.error(traceback.format_exc())
                 if self.receivingRetryCount < retryCount:
                     self.alive = False
                 else:
@@ -324,7 +294,7 @@ def start_receiving(self, exitCallback=None, getReceivingFnOnly=False):
         if hasattr(exitCallback, '__call__'):
             exitCallback()
         else:
-            logger.info('LOG OUT!')
+            log.info('LOG OUT!')
 
     if getReceivingFnOnly:
         return maintain_loop
@@ -364,7 +334,7 @@ def sync_check(self):
     regx = r'window.synccheck={retcode:"(\d+)",selector:"(\d+)"}'
     pm = re.search(regx, r.text)
     if pm is None or pm.group(1) != '0':
-        logger.debug('Unexpected sync check result: %s' % r.text)
+        log.debug('Unexpected sync check result: %s' % r.text)
         return None
     return pm.group(2)
 

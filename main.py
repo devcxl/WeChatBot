@@ -29,7 +29,7 @@ signal.signal(signal.SIGTERM, stop_program)
 class WeChatGPT:
 
     def __init__(self):
-        itchat.auto_login(enableCmdQR=2, hotReload=True, statusStorageDir=os.path.join(config.data_dirs, 'cookie.bin'))
+        itchat.auto_login(hotReload=True, statusStorageDir=os.path.join(config.data_dirs, 'cookie.bin'))
 
         self.history = {}
         self.prompts = {}
