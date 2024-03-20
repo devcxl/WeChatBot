@@ -1,8 +1,8 @@
-import binascii
 import logging
 import os
 import signal
 import sys
+import time
 import xml.etree.ElementTree as ET
 
 import openai
@@ -12,6 +12,7 @@ import config
 import itchat
 from common.load_balancer import balancer
 from handler.text import handler_text
+from itchat import utils
 from itchat.content import *
 
 log = logging.getLogger('main')
@@ -122,9 +123,16 @@ class WeChatGPT:
         @itchat.command(name='/imagine', detail='使用DALL-E-3生成图像', friend=True, group=False)
         def command_imagine(message, user):
             prompt = ",".join(message)
-            hex_string = binascii.hexlify(prompt.encode()).decode()
-            # binascii.unhexlify(hex_string).decode()
-            filename = f'{hex_string}.jpg'
+            if config.dalle3_cache:
+                prompt_hash = utils.calculate_md5(prompt)
+                prompt_filename = f'prompt-{prompt_hash}.txt'
+                prompt_filepath = os.path.join(config.data_dirs, 'dall-e-3', prompt_filename)
+                with open(prompt_filepath, 'w') as f:
+                    f.write(prompt)
+                filename = f'{prompt_hash}.jpg'
+            else:
+                filename = f'{int(time.time())}.jpg'
+
             filepath = os.path.join(config.data_dirs, 'dall-e-3', filename)
             if os.path.exists(filepath):
                 return f'@img@{filepath}'
