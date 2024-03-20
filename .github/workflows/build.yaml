@@ -3,6 +3,7 @@ on:
         branches:
             - 'feature/*'
             - 'bugfix/*'
+            - 'optimize/*'
 
 jobs:
     build-docker-image:
