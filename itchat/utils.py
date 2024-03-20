@@ -1,4 +1,4 @@
-import re, os, sys, subprocess, copy, traceback, logging
+import re, os, sys, subprocess, copy, traceback, logging, hashlib
 
 try:
     from HTMLParser import HTMLParser
@@ -137,3 +137,9 @@ def update_info_dict(oldInfoDict, newInfoDict):
             pass # these values will be updated somewhere else
         elif oldInfoDict.get(k) is None or v not in (None, '', '0', 0):
             oldInfoDict[k] = v
+
+def calculate_md5(text):
+    """Calculate the MD5 hash of a text."""
+    md5_hash = hashlib.md5()
+    md5_hash.update(text.encode('utf-8'))
+    return md5_hash.hexdigest()
