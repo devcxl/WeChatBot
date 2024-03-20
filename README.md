@@ -84,6 +84,7 @@ services:
 | get_current_weather | PLUGIN_WEATHER_KEY                                                                                        | 获取给定位置未来几天内的天气 | 明天上海天气怎么样，适合穿什么衣服                         |
 | get_current_time    | None                                                                                                      | 获取当前时间         | 现在距离明天晚上八点还有多长时间                          |
 | send_email          | PLUGIN_EMAIL_SMTP_SERVER,<br/>PLUGIN_EMAIL_SMTP_PORT,<br/>PLUGIN_EMAIL_ADDRESS,<br/>PLUGIN_EMAIL_PASSWORD | 向指定的邮箱发送邮件     | 给example@qq.com发封正式的商务邮件说我病了，明天的会议安排到下周一。 |
+| web_search          | None                                                                                                      | 获取网页搜索的前10条    | 帮我搜一下祖师爷赏饭是什么梗                            |
 
 ## 贡献FunctionCall插件
 
