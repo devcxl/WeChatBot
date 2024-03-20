@@ -53,20 +53,21 @@ services:
 
 ## 环境变量
 
-| 环境变量                     | 必需  | 默认值                          | 作用                                                 |
-|--------------------------|-----|------------------------------|----------------------------------------------------|
-| OPENAI_API_URL           | No  | https://api.openai.com/v1    | 设置OpenAI的接口                                        |
-| OPENAI_API_KEYS          | Yes | None                         | 设置OpenAI的多个APIKey,使用`,`分割                          |
-| MODEL                    | No  | gpt-3.5-turbo                | 设置对话使用的模型(建议使用带Function Call功能的模型)                 |
-| DEFAULT_PROMPT           | No  | You are a helpful assistant. | 设置默认提示词                                            |
-| HISTORY                  | No  | 15                           | 设置历史消息数                                            |
-| DATA_DIR                 | No  | /data                        | 设置数据文件夹位置                                          |
-| OPENAI_PROXY             | Yes | None                         | 设置请求OpenAI的HTTP/HTTPS代理(eg: http://127.0.0.1:8889) |
-| PLUGIN_WEATHER_KEY       | No  | None                         | 高德地图的APIKey                                        |
-| PLUGIN_EMAIL_SMTP_SERVER | No  | None                         | smtp服务器地址                                          |
-| PLUGIN_EMAIL_SMTP_PORT   | No  | None                         | smtp服务器端口                                          |
-| PLUGIN_EMAIL_ADDRESS     | No  | None                         | 邮箱发信地址                                             |
-| PLUGIN_EMAIL_PASSWORD    | No  | None                         | 邮箱smtp密码                                           |
+| 环境变量                     | 必需  | 默认值                          | 作用                                                                           |
+|--------------------------|-----|------------------------------|------------------------------------------------------------------------------|
+| OPENAI_API_URL           | No  | https://api.openai.com/v1    | 设置OpenAI的接口                                                                  |
+| OPENAI_API_KEYS          | Yes | None                         | 设置OpenAI的多个APIKey,使用`,`分割                                                    |
+| MODEL                    | No  | gpt-3.5-turbo                | 设置对话使用的模型(建议使用带Function Call功能的模型)                                           |
+| DEFAULT_PROMPT           | No  | You are a helpful assistant. | 设置默认提示词                                                                      |
+| HISTORY                  | No  | 15                           | 设置历史消息数                                                                      |
+| DATA_DIR                 | No  | /data                        | 设置数据文件夹位置                                                                    |
+| OPENAI_PROXY             | Yes | None                         | 设置请求OpenAI的HTTP/HTTPS代理，(eg: http://127.0.0.1:8889)<br/>使用该代理下载DALL-E-3生成的图片 |
+| OPENAI_DALL-E3_CACHE     | No  | True                         | 设置缓存DALL-E-3画图的结果，pormpt不变，生成的图不变                                            |
+| PLUGIN_WEATHER_KEY       | No  | None                         | 高德地图的APIKey                                                                  |
+| PLUGIN_EMAIL_SMTP_SERVER | No  | None                         | smtp服务器地址                                                                    |
+| PLUGIN_EMAIL_SMTP_PORT   | No  | None                         | smtp服务器端口                                                                    |
+| PLUGIN_EMAIL_ADDRESS     | No  | None                         | 邮箱发信地址                                                                       |
+| PLUGIN_EMAIL_PASSWORD    | No  | None                         | 邮箱smtp密码                                                                     |
 
 ## 聊天指令
 
