@@ -54,6 +54,8 @@ def handler_text(content: str, history: [], prompt: str = config.default_prompt)
             resp = str(response.choices[0].message.content)
             history.append({"role": "assistant", "content": resp})
             return resp
+    except KeyError:
+        return '请求失败，该模型不支持函数调用'
     except RateLimitError:
         return '请求过于频繁，请稍后再试。'
     except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
