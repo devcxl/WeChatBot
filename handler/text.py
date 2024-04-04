@@ -61,5 +61,5 @@ def handler_text(content: str, history: [], prompt: str = config.default_prompt)
         return f'函数执行失败'
     except RateLimitError:
         return '请求过于频繁，请稍后再试。'
-    except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
+    except openai.APIError:
         return 'OpenAI接口维护中，暂时无法处理消息。请耐心等待稍后再试。'
