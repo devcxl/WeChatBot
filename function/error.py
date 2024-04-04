@@ -11,7 +11,7 @@ class PluginException(Exception):
 
 class PluginUnregisteredException(PluginException):
     def __init__(self, name):
-        self.message = f"{name}未注册"
+        self.message = f"函数`{name}`未配置或不存在"
         super().__init__(self.message)
 
 

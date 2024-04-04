@@ -56,7 +56,7 @@ def handler_text(content: str, history: [], prompt: str = config.default_prompt)
             history.append({"role": "assistant", "content": resp})
             return resp
     except PluginUnregisteredException as e:
-        return f'请求失败，{e.message}该函数未配置或不存在'
+        return e.message
     except PlugInExecutionException:
         return f'函数执行失败'
     except RateLimitError:
