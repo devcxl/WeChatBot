@@ -7,6 +7,7 @@ from openai import RateLimitError
 import config
 import function
 from common.load_balancer import balancer
+from function.error import PluginUnregisteredException, PlugInExecutionException
 
 log = logging.getLogger('text')
 
@@ -31,9 +32,9 @@ def handler_text(content: str, history: [], prompt: str = config.default_prompt)
             messages.append(response_message)
             for tool_call in tool_calls:
                 function_name = tool_call.function.name
-                function_to_call = function.available_functions[function_name]
+                function_to_call = function.get_function(function_name)
                 function_args = json.loads(tool_call.function.arguments)
-                function_response = function_to_call(function_args)
+                function_response = function.execute(function_to_call, function_args)
                 messages.append(
                     {
                         "tool_call_id": tool_call.id,
@@ -54,9 +55,11 @@ def handler_text(content: str, history: [], prompt: str = config.default_prompt)
             resp = str(response.choices[0].message.content)
             history.append({"role": "assistant", "content": resp})
             return resp
-    except KeyError:
-        return '请求失败，该模型不支持函数调用'
+    except PluginUnregisteredException as e:
+        return e.message
+    except PlugInExecutionException:
+        return f'函数执行失败'
     except RateLimitError:
         return '请求过于频繁，请稍后再试。'
-    except (openai.InternalServerError, openai.NotFoundError, openai.UnprocessableEntityError):
+    except openai.APIError:
         return 'OpenAI接口维护中，暂时无法处理消息。请耐心等待稍后再试。'
