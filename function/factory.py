@@ -1,6 +1,7 @@
 import logging
 
 from function.base import BaseFunction
+from function.error import PluginUnregisteredException, PlugInExecutionException
 
 log = logging.getLogger('functions factory')
 
@@ -32,7 +33,14 @@ class Functions:
             self.declares.append(function.declare())
         return self.declares
 
-    def get_all_available(self):
+    def get(self, function_name):
         for function in self.functions:
-            self.available[function.declare().get('function').get('name')] = function.execute
-        return self.available
+            if function_name == function.declare().get('function').get('name'):
+                return function.execute
+        raise PluginUnregisteredException(function_name)
+
+    def execute(self, function, function_args):
+        try:
+            return function(function_args)
+        except RuntimeError as e:
+            raise PlugInExecutionException(e)

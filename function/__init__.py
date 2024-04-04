@@ -13,4 +13,6 @@ functions.register(WebSearchFunction)
 
 function_declares = functions.get_all_declare()
 
-available_functions = functions.get_all_available()
+get_function = functions.get
+
+execute = functions.execute
