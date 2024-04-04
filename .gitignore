@@ -6,3 +6,4 @@ config.json
 dist/
 build/
 emoji/
+.idea/
