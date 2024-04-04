@@ -42,5 +42,5 @@ class Functions:
     def execute(self, function, function_args):
         try:
             return function(function_args)
-        except RuntimeError as e:
+        except Exception as e:
             raise PlugInExecutionException(e)
