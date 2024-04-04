@@ -6,6 +6,7 @@ log = logging.getLogger('function error')
 class PluginException(Exception):
     def __init__(self, message="Something went wrong."):
         self.message = message
+        log.error(self.message)
         super().__init__(self.message)
 
 
@@ -17,5 +18,5 @@ class PluginUnregisteredException(PluginException):
 
 class PlugInExecutionException(PluginException):
     def __init__(self, error):
-        self.message = "执行失败"
+        self.message = error
         super().__init__(self.message)
